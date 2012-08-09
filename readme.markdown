@@ -15,6 +15,9 @@ It is a bit early in development.
 ## Depends on
 The GL stuff in [parse-c-header](https://github.com/o-jasper/parse-c-header)/[src/julia-src](https://github.com/o-jasper/parse-c-header/tree/master/src/julia-src).
 
+Currently to use it, the `sdl_bad_utils` directory has to be in 
+`LD_LIBRARY_PATH` the test `run1.sh` does this, but it sucks..
+
 ### Usage
 To use, edit `~/.juliarc.jl` and add.
 
