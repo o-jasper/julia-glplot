@@ -37,7 +37,7 @@ function run_test()
   prev_time = time()
   while true
   #Add stuff it time to do so.
-    if time() > next_add_t #Try make a new path in regular intervals.
+    if time() > next_add_t #At random time intervals, add stuff.
       incorporate(cpsh, time()-start, (1+sin(time()))/2 + randexp()/10)
       wait_time = rand()/3
       next_add_t = time() + wait_time

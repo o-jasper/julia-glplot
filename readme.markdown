@@ -16,12 +16,12 @@ It is a bit early in development.
 The GL stuff in [parse-c-header](https://github.com/o-jasper/parse-c-header)/[src/julia-src](https://github.com/o-jasper/parse-c-header/tree/master/src/julia-src).
 
 ### Usage
-To use, edit `~/.juliarc.jl` and add 
+To use, edit `~/.juliarc.jl` and add.
 
     push(LOAD_PATH, "$(julia-glplot)/julia-glplot")
 
-Then things can be loaded with paths originating from that. There is an 
-example in `doc/juliarc_part.jl`
+If you didn't forget to run `make` in parse-c-header, things can be loaded
+with paths originating from that. There is an example in `doc/juliarc_part.jl`
 
 #### run.sh and running the examples/test
 `run.sh` needs a single argument; the file to be run. That file then `load`s 
@@ -40,7 +40,7 @@ function can be run.
 * Real time plotter 'averages over different lengths of time' plot and
   corresponding '2d' histogram.(actually a line of histograms for each)
 
-* better docs, examples.(Well the test are examples.)
+* better docs, examples.(Well the tests are examples.)
 
 * Can help getting data in?
 

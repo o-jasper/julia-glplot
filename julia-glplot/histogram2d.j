@@ -7,12 +7,14 @@
 # (at your option) any later version.
 #
 
+#TODO completely untested!
+
 type Histogram2d #'plain' 2d histogram.
   sx::Float64 #Start.
   sy::Float64
   dx::Float64 #Step.
   dy::Float64 
-  hist::Array{Int64,1}
+  hist::Array{Int64,2}
 end
 
 Histogram2d(fx::Number,fy::Number, tx::Number,ty::Number,

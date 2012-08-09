@@ -7,6 +7,7 @@
 # (at your option) any later version.
 #
 
+#TODO completely untested!!
 #Histograms that always register stuff, by expanding in some way.
 
 type Histogram2dExpanding #Expands if things drop off.
