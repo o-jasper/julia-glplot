@@ -7,11 +7,11 @@ load("gl_util.j")
 
 load("sdl_bad_utils/sdl_event.j")
 
-load("histogram.j")
+load("julia-glplot/histogram.j")
 
-load("plot_able.j")
-load("plot_gl.j")
-load("plot_histogram_gl.j")
+load("julia-glplot/plot_able.j")
+load("julia-glplot/plot_gl.j")
+load("julia-glplot/plot_histogram_gl.j")
 
 function run_this ()
   screen_width = 640
@@ -19,7 +19,7 @@ function run_this ()
   init_stuff()
 
   mx(i) = -1 + 2*i/screen_width
-  my(j) = 1 - 2*j/screen_height
+  my(j) = +1 - 2*j/screen_height
   mx()  = mx(mouse_x())
   my()  = my(mouse_y())
 
@@ -30,7 +30,7 @@ function run_this ()
   while true
     @with_pushed_matrix begin
       unit_frame()
-      frame_from(0.1,0.1, 0.9,0.9)
+      unit_frame_to(0.1,0.1, 0.9,0.9)
       glcolor(0.3,0.3,0.3)
       function sqr(x)
         return x^2

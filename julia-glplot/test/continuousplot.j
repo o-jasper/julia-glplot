@@ -7,16 +7,16 @@ load("gl_util.j")
 load("sdl_bad_utils/init_stuff.j")
 load("sdl_bad_utils/sdl_event.j")
 
-load("util/util.j")
+#load("util/util.j")
 load("util/geom.j")
 
-load("histogram.j")
+load("julia-glplot/histogram.j")
 
-load("plot_able.j")
-load("plot_gl.j")
-load("plot_histogram_gl.j")
+load("julia-glplot/plot_able.j")
+load("julia-glplot/plot_gl.j")
+load("julia-glplot/plot_histogram_gl.j")
 
-load("continuous_plot_gl.j")
+load("julia-glplot/continuous_plot_gl.j")
 
 screen_width = 640
 screen_height = 640
@@ -45,6 +45,7 @@ function run_test()
   #Drawing stuff.
     @with_pushed_matrix begin
       unit_frame()
+      unit_frame_to(0.1,0.1, 0.9,0.9)
       glcolor(1,1,1)
       gl_plot(cpsh, 0.2)#0,2) #,0.2) 
     end

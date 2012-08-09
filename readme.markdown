@@ -20,9 +20,18 @@ To use, edit `~/.juliarc.jl` and add
 
     push(LOAD_PATH, "$(julia-glplot)/julia-glplot")
 
-Then things can be loaded with paths originating from that.
+Then things can be loaded with paths originating from that. There is an 
+example in `doc/juliarc_part.jl`
+
+#### run.sh and running the examples/test
+`run.sh` needs a single argument; the file to be run. That file then `load`s 
+the other needed files. Only the files with the `load`s and with a `run_this`
+function can be run.
 
 ## (maybe)TODO
+
+* How stuff is loaded/run not standard? How do i get this to be according to
+  'the best convention' out there?
 
 * expanding', histograms and the logarithmic use thereof
   (prevents prohibitive array sizes which still incorporating *everything*)

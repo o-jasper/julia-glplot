@@ -151,9 +151,9 @@ gl_plot(cpsh::ContinuousPlotHist, range::(Number,Number,Number,Number))=
   gl_plot(cpsh.cp, range)
 
 function gl_plot(cpsh::ContinuousPlotHist)
- #TODO this just default
   (fy,ty) = cpsh.h.s, cpsh.h.s + cpsh.h.d*length(cpsh.h)
-  glcolor(0.2,0.2,0.2) #TODO allow user to do it.
+  glcolor(0.2,0.2,0.2) #TODO allow user to determine the colors
+                       # (..linewidth, etc) throughout
   @with_pushed_matrix begin #And the histogram rotated 90 degrees.
     glrotate(90)
     gltranslate(0,-1)
@@ -169,9 +169,9 @@ function gl_plot(cpsh::ContinuousPlotHist, time_distribution_h::Number)
   const dot_size = 0.005
   @with_pushed_matrix begin #Time difference distribution plot.
     if h>0
-      frame_from(1,0,0,h)
+      unit_frame_to(1,0,0,h)
     else
-      frame_from(1,1+h,0,1)
+      unit_frame_to(1,1+h,0,1)
     end
     glcolor(0,1,0)
     range = plot_range_of(cpsh.arrival)
@@ -181,7 +181,7 @@ function gl_plot(cpsh::ContinuousPlotHist, time_distribution_h::Number)
       glvertex(1,0)
       glvertex(range[3]/cpsh.cp.duration,1)
     end
-    glcolor(0.5,0.5,0.5) #TODO allow user to do it.
+    glcolor(0.5,0.5,0.5) 
     gl_plot_filled_box(cpsh.arrival)
     glcolor(1,1,0)
     @with_primitive GL_QUADS begin
@@ -191,7 +191,7 @@ function gl_plot(cpsh::ContinuousPlotHist, time_distribution_h::Number)
     end
   end
   @with_pushed_matrix begin #Draw regular plot.
-    frame_to(0,max(h,0), 1,min(1,1+h))
+    unit_frame_to(0,max(h,0), 1,min(1,1+h))
     gl_plot(cpsh)
     if !isempty(cpsh.cp.data)
       x,y = last(cpsh.cp.data)
