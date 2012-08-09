@@ -55,4 +55,4 @@ function run_test()
   end
 end
 
-run_this() = run_test()
+run_test()

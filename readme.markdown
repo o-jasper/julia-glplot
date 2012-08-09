@@ -13,10 +13,7 @@ Contains
 It is a bit early in development.
 
 ## Depends on
-The GL stuff in [parse-c-header](https://github.com/o-jasper/parse-c-header)/[src/julia-src](https://github.com/o-jasper/parse-c-header/tree/master/src/julia-src).
-
-Currently to use it, the `sdl_bad_utils` directory has to be in 
-`LD_LIBRARY_PATH` the test `run1.sh` does this, but it sucks..
+The GL stuff in [parse-c-header](https://github.com/o-jasper/parse-c-header)/[julia-src](https://github.com/o-jasper/parse-c-header/tree/master/julia-src).
 
 ### Usage
 To use, edit `~/.juliarc.jl` and add.
@@ -24,7 +21,9 @@ To use, edit `~/.juliarc.jl` and add.
     push(LOAD_PATH, "$(julia-glplot)/julia-glplot")
 
 If you didn't forget to run `make` in parse-c-header, things can be loaded
-with paths originating from that. There is an example in `doc/juliarc_part.jl`
+with paths originating from that. There is an example in 
+`doc/example_juliarc_part.jl`
+(it includes things needed by parse-c-header)
 
 #### run.sh and running the examples/test
 `run.sh` needs a single argument; the file to be run. That file then `load`s 

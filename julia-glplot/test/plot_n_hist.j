@@ -58,3 +58,5 @@ function run_this ()
     flush_events()
   end
 end
+
+run_this()
