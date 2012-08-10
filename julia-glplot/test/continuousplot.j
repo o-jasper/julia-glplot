@@ -1,4 +1,5 @@
 
+load("load_so.j")
 load("get_c.j")
 
 load("autoffi/gl.j")

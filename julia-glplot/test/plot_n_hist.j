@@ -1,4 +1,5 @@
 
+load("load_so.j")
 load("get_c.j")
 load("sdl_bad_utils/init_stuff.j")
 
