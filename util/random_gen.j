@@ -1,3 +1,10 @@
+#  Jasper den Ouden 02-08-2012
+# Placed in public domain.
+
+function pick_random(list::Vector)
+  assert( !isempty(list), "Can't pick randomly from empty list." )
+  return list[randi(length(list))]
+end
 
 #Generate n unique values upto given integer.
 # NOTE should be equivalent to `randperm(upto)[1:n]` ?

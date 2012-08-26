@@ -32,6 +32,9 @@ function can be run.
 
 ## (maybe)TODO
 
+* `plot_able.j` makes things plottable, by adding `done(thing,index)`, 
+  and `pos(thing,index)`, much nicer to use the regular iterable stuff.
+
 * How stuff is loaded/run not standard? How do i get this to be according to
   'the best convention' out there?
 

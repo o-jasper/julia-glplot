@@ -7,6 +7,8 @@
 # (at your option) any later version.
 #
 
+#TODO separate out all the gl stuff.
+
 #2d plot that takes up data and keeps it for some duration.
 type ContinuousPlot
   duration::Float64

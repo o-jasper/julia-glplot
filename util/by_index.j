@@ -1,4 +1,7 @@
+#  Jasper den Ouden 02-08-2012
+# Placed in public domain.
 
+#TODO explain what it does.
 
 type ByIndexNode{T}
   index::Int16

@@ -1,3 +1,5 @@
+#  Jasper den Ouden 02-08-2012
+# Placed in public domain.
 
 dist(a,b) = dist(pos(a),pos(b))
 dist(a::Vector,b::Vector)    = norm(a-b)
