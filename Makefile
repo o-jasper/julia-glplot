@@ -9,5 +9,5 @@ test_util:
 	cd util/test/;\
 	make test
 test_glplot:
-	cd julia-glplot/test/;
+	cd julia-glplot/test/;\
 	make test

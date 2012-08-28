@@ -12,10 +12,12 @@ Contains
 
 It is a bit early in development.
 
+Also contains some utilities i use in `util/`
+
 ## Depends on
 The GL stuff in [parse-c-header](https://github.com/o-jasper/parse-c-header)/[julia-src](https://github.com/o-jasper/parse-c-header/tree/master/julia-src).
 
-### Usage
+## Usage
 To use, edit `~/.juliarc.jl` and add.
 
     push(LOAD_PATH, "$(julia-glplot)/julia-glplot")
@@ -23,12 +25,19 @@ To use, edit `~/.juliarc.jl` and add.
 If you didn't forget to run `make` in parse-c-header, things can be loaded
 with paths originating from that. There is an example in 
 `doc/example_juliarc_part.jl`
-(it includes things needed by parse-c-header)
+(it includes things needed by parse-c-header) The testing files can then be 
+run with `julia test/somefile.j` (If all well, not mattering from which
+directory)
 
-#### run.sh and running the examples/test
-`run.sh` needs a single argument; the file to be run. That file then `load`s 
-the other needed files. Only the files with the `load`s and with a `run_this`
-function can be run.
+### Tests
+Can be run with `make test_all` and other entries in the makefiles. They 
+output into like `test/result/run_list`
+
+    $USER `git status|wc -l` `git log|head -n 1` time `date +%s` ... number of lines in stdout`
+	
+Inperfect as it is, it gives an indication how well things work. Stdout is 
+outputted into `test/result` files aswel, zero lines aught to indicate no 
+errors.
 
 ## (maybe)TODO
 
