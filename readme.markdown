@@ -20,7 +20,7 @@ The GL stuff in [parse-c-header](https://github.com/o-jasper/parse-c-header)/[ju
 ## Usage
 To use, edit `~/.juliarc.jl` and add.
 
-    push(LOAD_PATH, "$(julia-glplot)/julia-glplot")
+    push(LOAD_PATH, "$(path_to_julia-glplot)) #(Only says julia-glplot once in filename.)
 
 If you didn't forget to run `make` in parse-c-header, things can be loaded
 with paths originating from that. There is an example in 
