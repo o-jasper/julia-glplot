@@ -14,10 +14,10 @@ load("util/geom.j")
 load("julia-glplot/histogram.j")
 
 load("julia-glplot/plot_able.j")
-load("julia-glplot/plot_gl.j")
-load("julia-glplot/plot_histogram_gl.j")
+load("julia-glplot/gl_plot.j")
+load("julia-glplot/gl_plot_histogram.j")
 
-load("julia-glplot/continuous_plot_gl.j")
+load("julia-glplot/gl_plot_continuous.j")
 
 screen_width = 640
 screen_height = 640
