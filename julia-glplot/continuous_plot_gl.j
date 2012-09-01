@@ -120,16 +120,16 @@ gl_plot(cp::ContinuousPlot, fy::Number,ty::Number) =
 #Fancier version also histograms stuff.
 type ContinuousPlotHist
   cp::ContinuousPlot
-  h::Histogram
-  arrival::Histogram #Arrival time-difference histogram.
+  h::HistogramFancy
+  arrival::HistogramFancy #Arrival time-difference histogram.
   last_delta::Float64
 end
 
 ContinuousPlotHist(duration::Number, fy::Number,ty::Number, n::Integer,
                    arrival_range::Number)=
     ContinuousPlotHist(ContinuousPlot(duration), 
-                       Histogram(fy,ty,n),
-                       Histogram(0,arrival_range, n), float64(0))
+                       HistogramFancy(fy,ty,n),
+                       HistogramFancy(0,arrival_range, n), float64(0))
 
 ContinuousPlotHist(duration::Number, fy::Number,ty::Number, n::Integer) =
     ContinuousPlotHist(duration, fy,ty,n, duration/10)
@@ -153,13 +153,14 @@ gl_plot(cpsh::ContinuousPlotHist, range::(Number,Number,Number,Number))=
   gl_plot(cpsh.cp, range)
 
 function gl_plot(cpsh::ContinuousPlotHist)
-  (fy,ty) = cpsh.h.s, cpsh.h.s + cpsh.h.d*length(cpsh.h)
+  hist = cpsh.h.lin_area
+  (fy,ty) = hist.s, hist.s + hist.d*length(hist)
   glcolor(0.2,0.2,0.2) #TODO allow user to determine the colors
                        # (..linewidth, etc) throughout
   @with_pushed_matrix begin #And the histogram rotated 90 degrees.
     glrotate(90)
     gltranslate(0,-1)
-    gl_plot_filled_box(cpsh.h)
+    gl_plot_filled_box(hist)
   end
   glcolor(1,0,0)
   gl_plot(cpsh.cp, fy,ty)
@@ -176,7 +177,7 @@ function gl_plot(cpsh::ContinuousPlotHist, time_distribution_h::Number)
       unit_frame_to(1,1+h,0,1)
     end
     glcolor(0,1,0)
-    range = plot_range_of(cpsh.arrival)
+    range = plot_range_of(cpsh.arrival.lin_area)
     @with_primitive GL_LINES begin
       glvertex(0,0) 
       glvertex(0,1)
@@ -184,7 +185,7 @@ function gl_plot(cpsh::ContinuousPlotHist, time_distribution_h::Number)
       glvertex(range[3]/cpsh.cp.duration,1)
     end
     glcolor(0.5,0.5,0.5) 
-    gl_plot_filled_box(cpsh.arrival)
+    gl_plot_filled_box(cpsh.arrival.lin_area)
     glcolor(1,1,0)
     @with_primitive GL_QUADS begin
       fx,meh = map_to_range(cpsh.last_delta, 0, range)
@@ -197,7 +198,8 @@ function gl_plot(cpsh::ContinuousPlotHist, time_distribution_h::Number)
     gl_plot(cpsh)
     if !isempty(cpsh.cp.data)
       x,y = last(cpsh.cp.data)
-      fy,ty = (cpsh.h.s, cpsh.h.s + cpsh.h.d*length(cpsh.h))
+      hist = cpsh.h.lin_area
+      fy,ty = (hist.s, hist.s + hist.d*length(hist))
       rx,ry = map_to_range(x,y, plot_range_of(cpsh.cp, fy,ty, time()))
       glcolor(1,1,0)
       @with_primitive GL_QUADS begin

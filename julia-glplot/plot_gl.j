@@ -8,6 +8,7 @@
 #
 
 #Makes the matrix project the given range to (0,0,1,1)
+# TODO gl_util has a function for it.(use it instead)
 function prep_matrix(range::(Number,Number,Number,Number))
   fx,fy,tx,ty = range
   glscale(1/(tx-fx),1/(ty-fy))
@@ -175,8 +176,28 @@ function gl_plot{T}(mode::Integer,thing::T,
   assert(!in_mode, "In mode at end!")
 end
 
-#You can pick other things, of course, like GL_TRIANGLE_STRIP if you think it is convex.
+#You can pick other things, of course, like GL_TRIANGLE_STRIP if you think 
+# it is convex.(TODO.. where? false comment?)
 gl_plot{T}(thing::T, range::(Number,Number,Number,Number)) =
     gl_plot(GL_LINE_STRIP, thing::T, range)
 
-#TODO filled stuff with lines over them.
+#'bar intensity plot'.
+function plot_bar_intensity{T}(thing::T,
+                               range::(Number,Number,Number,Number),
+                               colors::Array{(Number,Number,Number),1})
+  fx,fy, tx,ty = range
+  cur_color(y) = colors[clamp(length(colors)*integer((y-fy)/(ty-fy)), 
+                              1,length(colors))]
+  @with_primitive GL_QUAD_STRIP begin
+    while !done(thing,i,range)
+      x,y = pos(thing,i,range)
+      glcolor(cur_color(y))
+      glvertex(x,0)
+      glvertex(x,1)
+      i+=1
+    end
+  end
+end
+
+const grayscale_color = [(0,0,0), (1,1,1)]
+#TODO more of them.

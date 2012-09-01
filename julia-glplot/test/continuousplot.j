@@ -39,7 +39,8 @@ function run_test()
   while true
   #Add stuff it time to do so.
     if time() > next_add_t #At random time intervals, add stuff.
-      incorporate(cpsh, time()-start, (1+sin(time()))/2 + randexp()/10)
+      incorporate(cpsh, time()-start, 
+                  (1+sin(time()))/2 + randexp()/10 + 2*rand()^10)
       wait_time = rand()/3
       next_add_t = time() + wait_time
     end

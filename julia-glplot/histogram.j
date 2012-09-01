@@ -86,8 +86,9 @@ type HistogramLog
   p::HistogramExpanding
 end
 
-HistogramLog(low::Number, e::Number) =
-    HistogramLog(float64(low), HistogramExpanding(0,e), HistogramExpanding(0,e))
+HistogramLog(low::Number, d::Number) =
+    HistogramLog(float64(low), 
+                 HistogramExpanding(0,d), HistogramExpanding(0,d))
 
 length(h::HistogramLog) = length(h.n) + length(h.p)
 
@@ -99,9 +100,9 @@ min(h::HistogramLog) = min(h.n,h.p)
 
 function incorporate(h::HistogramLog, x::Number, step::Integer)
   if x>0
-    incorporate(h.p, log(max(x, h.low)), step)
+    incorporate(h.p, log10(max(x, h.low)), step)
   else
-    incorporate(h.p, log(max(-x, h.low)), step)
+    incorporate(h.p, log10(max(-x, h.low)), step)
   end
 end
 
@@ -118,8 +119,10 @@ min(h::HistogramFancy) = min(h.lin_area,h.log)
 HistogramFancy(fr::Number,to::Number, n::Integer, low::Number,e::Number) =
     HistogramFancy(Histogram(fr,to,n),HistogramLog(low,e))
 
-HistogramFancy(fr::Number,to::Number,n::Integer, low::Number,e::Number) =
-    Histogram(fr,to, n, low,e)
+HistogramFancy(fr::Number,to::Number, n::Integer, e::Number) =
+    HistogramFancy(fr,to, n, (to-fr)/n, e)
+HistogramFancy(fr::Number,to::Number, n::Integer) =
+    HistogramFancy(fr,to, n, 2/n)
 
 function incorporate(h::HistogramFancy, x::Number, step::Integer)
   if incorporate(h.lin_area, x,step)!=nothing #If drops out

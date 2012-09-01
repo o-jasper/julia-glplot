@@ -15,7 +15,7 @@ macro with_open_file(stream_var,file, mode, body)
   end
 end
 
-#Find an index that `is` the same.(TODO doesn't already exist?
+#Find an index that `is` the same.(TODO doesn't already exist?)
 function find_index{T}(arr::Array{T,1},find::T)
   for i = 1:length(arr)
     if is(arr[i],find)
@@ -90,3 +90,5 @@ macro each_cond(clauses)
   end
   Expr(:block, map(when_clause, clauses.args),Any)
 end
+
+#TODO 

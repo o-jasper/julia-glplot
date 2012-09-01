@@ -63,3 +63,5 @@ gl_plot(h::HistogramExpanding, range::(Number,Number,Number,Number)) =
 gl_plot(h::HistogramExpanding, box_to::Number) =
      gl_plot(h,plot_range_of(h), box_to)
 gl_plot(h::HistogramExpanding) = gl_plot(h,plot_range_of(h), min(h))
+
+    
