@@ -1,0 +1,13 @@
+real_path: No such file or directory
+ in system_error at error.jl:16
+ in real_path at file.jl:157
+ in find_in_path at util.jl:199
+ in load at util.jl:224
+ in load at util.jl:230
+ in load at util.jl:242
+ in process_options at client.jl:175
+ in _start at client.jl:227
+at /home/jasper/proj/julia/julia-glplot/julia-glplot/test/plot_n_hist.j:14
+ in load at util.jl:253
+ in process_options at client.jl:175
+ in _start at client.jl:227

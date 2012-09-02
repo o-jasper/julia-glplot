@@ -7,14 +7,6 @@
 # (at your option) any later version.
 #
 
-#Makes the matrix project the given range to (0,0,1,1)
-# TODO gl_util has a function for it.(use it instead)
-function prep_matrix(range::(Number,Number,Number,Number))
-  fx,fy,tx,ty = range
-  glscale(1/(tx-fx),1/(ty-fy))
-  gltranslate(-fx,-fy)
-end
-
 function gl_plot_under{T}(mode::Integer, thing::T, 
                           range::(Number,Number,Number,Number),
                           to::Number, rectangular::Bool)
@@ -25,7 +17,7 @@ function gl_plot_under{T}(mode::Integer, thing::T,
   end
   fx,fy,tx,ty = range
   @with_pushed_matrix begin
-    prep_matrix(range)
+    unit_frame_from(range)
     if mode==GL_QUAD_STRIP && !rectangular
       glbegin(mode)
     end
@@ -106,7 +98,7 @@ function gl_plot{T}(mode::Integer,thing::T,
   fx,fy,tx,ty = range
   inside(x,y) = (x>=fx && y>=fy && x<=tx && y<=ty)
   @with_pushed_matrix begin
-    prep_matrix(range)
+    unit_frame_from(range)
     px,py = pos(thing,1,range)
     inside_p::Bool = inside(px,py)
     if inside_p
@@ -146,34 +138,42 @@ gl_plot{T}(thing::T, range::(Number,Number,Number,Number)) =
     gl_plot(GL_LINE_STRIP, thing::T, range)
 
 #'bar intensity plot'.
-function plot_bar_intensity{T}(thing::T, draw_yrange::(Number,Number),
-                               range::(Number,Number,Number,Number),
-                               colors::Array{(Number,Number,Number),1})
+function gl_plot_bar_intensity{T}(thing::T, draw_yrange::(Number,Number),
+                                  range::(Number,Number,Number,Number),
+                                  colors::Array{(Number,Number,Number),1})
   fx,fy, tx,ty = range
-  cur_color(y) = colors[clamp(length(colors)*integer((y-fy)/(ty-fy)), 
-                              1,length(colors))]
+  d = (ty-fy)/(length(colors)+1)
+  function cur_color(y)
+    i = clamp(int(ceil((y-fy)/d)), 1,length(colors))
+#    println((i, (y-fy)/d +1- i,y))
+    if i == length(colors)
+      return colors[i] #==last(colors)
+    else
+      r,g,b = colors[i] #Interpolate color.
+      nr,ng,nb = colors[i+1]
+      f = (y-fy)/d +1- i
+      return ((1-f)*r + f*nr, (1-f)*g + f*ng, (1-f)*b + f*nb)
+    end
+  end
   @with_pushed_matrix begin
     draw_fy,draw_ty = draw_yrange
-    prep_matrix((fx,draw_fy, tx,draw_ty))
+    unit_frame_from(fx,draw_fy, tx,draw_ty)
     @with_primitive GL_QUAD_STRIP begin
       i = 1
       while !done(thing,i,range)
         x,y = pos(thing,i,range)
         glcolor(cur_color(y))
-        glvertex(x,0)
+        glvertex(x,0) #TODO more vertices if 'hard edge' desired.
         glvertex(x,1)
         i+=1
       end
     end
   end
 end
-plot_bar_intensity{T}(thing::T, draw_w::Number,
+gl_plot_bar_intensity{T}(thing::T, draw_w::Number,
                       range::(Number,Number,Number,Number),
                       colors::Array{(Number,Number,Number),1}) =
-    plot_bar_intensity(thing, (0,draw_w), range,colors)
-plot_bar_intensity{T}(thing::T, range::(Number,Number,Number,Number),
-                      colors::Array{(Number,Number,Number),1}) =
-    plot_bar_intensity(thing, 1, range,colors)
+    gl_plot_bar_intensity(thing, (0,draw_w), range,colors)
 
 const grayscale_color = [(0,0,0), (1,1,1)]
 #TODO more color themes.

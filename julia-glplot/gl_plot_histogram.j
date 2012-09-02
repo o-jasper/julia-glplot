@@ -21,47 +21,47 @@ done(h::HistogramExpanding,i::Integer) = done(h.h,i)
 pos(h::HistogramFancy,i::Integer) = pos(h.lin_area,i)
 done(h::HistogramFancy,i::Integer) = done(h.lin_area,i)
 
-# gl_plot establishes defaults.
-
-gl_plot(h::Histogram, range::(Number,Number,Number,Number), box_to::Number) =
-    gl_plot_box(h, range, box_to)
-
-gl_plot(h::Histogram, range::(Number,Number,Number,Number)) = 
-    gl_plot(h,range, range[2])
-
-gl_plot(h::Histogram, box_to::Number) = gl_plot(h,plot_range_of(h), box_to)
-gl_plot(h::Histogram) = gl_plot(h,plot_range_of(h), min(h))
-
-#Extend filled box.
 #NOTE gl_plot_filled_box(Histogram,(NNNN),Number) works by a generic function
 # in plot_gl.j!
-gl_plot_filled_box(h::Histogram, range::(Number,Number,Number,Number)) = 
-    gl_plot_filled_box(h,range, range[2])
 
-gl_plot_filled_box(h::Histogram, box_to::Number) = 
-    gl_plot_filled_box(h,plot_range_of(h), box_to)
-gl_plot_filled_box(h::Histogram) = 
-    gl_plot_filled_box(h,plot_range_of(h), min(h))
+typealias HistogramTypes Union(Histogram,HistogramExpanding)
 
-gl_plot_under(h::Histogram, range::(Number,Number,Number,Number)) =
-    gl_plot_under(h,range)
-
-gl_plot_under(h::Histogram,to::Number) = 
-    gl_plot_under(h.hist,plot_range_of(h),to)
-gl_plot_under(h::Histogram) = gl_plot_under(h,plot_range_of(h))
-gl_plot_above(h::Histogram) = gl_plot_above(h,plot_range_of(h))
-
-#And empty box.
+#HistogramExpanding has to tell it to look at the Histogram object inside.
 gl_plot(h::HistogramExpanding, range::(Number,Number,Number,Number), 
         box_to::Number) =
-    gl_plot(h.h, range, box_to)
+    gl_plot_box(h.h, range, box_to)
 
-gl_plot(h::HistogramExpanding, range::(Number,Number,Number,Number)) =
-    gl_plot(h.h, range, range[2])
+gl_plot(h::HistogramTypes,
+        range::(Number,Number,Number,Number), box_to::Number) =
+    gl_plot_box(h, range, box_to)
+gl_plot(h::HistogramTypes, range::(Number,Number,Number,Number)) = 
+    gl_plot(h,range, range[2])
 
-#TODO code repeat..
-gl_plot(h::HistogramExpanding, box_to::Number) =
-     gl_plot(h,plot_range_of(h), box_to)
-gl_plot(h::HistogramExpanding) = gl_plot(h,plot_range_of(h), min(h))
+gl_plot(h::HistogramTypes, box_to::Number) = 
+    gl_plot(h,plot_range_of(h), box_to)
+gl_plot(h::HistogramTypes) =
+    gl_plot(h,plot_range_of(h), min(h))
 
-    
+#Generic guys to fit on all the histograms.(and more?)
+
+#plot
+#filled_box
+gl_plot_filled_box{H}(h::H, range::(Number,Number,Number,Number)) = 
+    gl_plot_filled_box(h,range, range[2])
+
+gl_plot_filled_box{H}(h::H, box_to::Number) = 
+    gl_plot_filled_box(h,plot_range_of(h), box_to)
+gl_plot_filled_box{H}(h::H) = 
+    gl_plot_filled_box(h,plot_range_of(h), min(h))
+#plot_under
+gl_plot_under{H}(h::H, range::(Number,Number,Number,Number)) =
+    gl_plot_under(h,range)
+
+gl_plot_under{H}(h::H,to::Number) = gl_plot_under(h.hist,plot_range_of(h),to)
+gl_plot_under{H}(h::H)            = gl_plot_under(h,plot_range_of(h))
+gl_plot_above{H}(h::H)            = gl_plot_above(h,plot_range_of(h))
+
+#bar_intensity.
+gl_plot_bar_intensity{YRange,H}(h::H, yr::YRange,
+                           colors::Array{(Number,Number,Number),1}) =
+    gl_plot_bar_intensity(h, yr, plot_range_of(h), colors)

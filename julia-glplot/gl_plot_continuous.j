@@ -152,6 +152,7 @@ incorporate(cpsh::ContinuousPlotHist, x::Number,y::Number) =
 gl_plot(cpsh::ContinuousPlotHist, range::(Number,Number,Number,Number))=
   gl_plot(cpsh.cp, range)
 
+#Continuous plot with distribution histogram with current actuality underneath
 function gl_plot(cpsh::ContinuousPlotHist)
   hist = cpsh.h.lin_area
   (fy,ty) = hist.s, hist.s + hist.d*length(hist)
@@ -166,8 +167,13 @@ function gl_plot(cpsh::ContinuousPlotHist)
   gl_plot(cpsh.cp, fy,ty)
 end
 
-#TODO arrival distribution (optionally)at different scale with indication.
-function gl_plot(cpsh::ContinuousPlotHist, time_distribution_h::Number)
+#TODO Can this be done more cleanly..
+#For instance make them specifically about one thing and have them alter the
+# gl matrix accordingly.
+
+#Continuous plot with histogram and time-distribution histogram.
+function gl_plot_time_dist(cpsh::ContinuousPlotHist,
+                           time_distribution_h::Number)
   h = time_distribution_h
   const dot_size = 0.005
   @with_pushed_matrix begin #Time difference distribution plot.
@@ -193,18 +199,48 @@ function gl_plot(cpsh::ContinuousPlotHist, time_distribution_h::Number)
       rect_vertices(fx,fy, fx+2*dot_size,fy+2*dot_size/abs(h))
     end
   end
-  @with_pushed_matrix begin #Draw regular plot.
-    unit_frame_to(0,max(h,0), 1,min(1,1+h))
+  unit_frame_to(0,max(h,0), 1,min(1,1+h))
+end
+
+#  @with_pushed_matrix begin #Draw regular plot.
+#    unit_frame_to(0,max(h,0), 1,min(1,1+h))
+#    gl_plot(cpsh)
+#    if !isempty(cpsh.cp.data)
+#      x,y = last(cpsh.cp.data)
+#      hist = cpsh.h.lin_area
+#      fy,ty = (hist.s, hist.s + hist.d*length(hist))
+#      rx,ry = map_to_range(x,y, plot_range_of(cpsh.cp, fy,ty, time()))
+#      glcolor(1,1,0)
+#      @with_primitive GL_QUADS begin
+#        vertices_rect_around(clamp(rx,0,1),clamp(ry,0,1), dot_size)
+#      end
+#    end
+#  end
+
+#Continuous plot with a little space(potentially) for an intensity plot.
+function gl_plot_pre_intensity(cpsh::ContinuousPlotHist, 
+                               intensity_w::Number, colors::Vector)
+  @with_pushed_matrix begin
+    unit_frame_to(1-intensity_w,0, 1,1)
+    glrotate(90)
+    gltranslate(0,-1)
+    gl_plot_bar_intensity(cpsh.h.lin_area, 1,colors)
+  end
+  unit_frame_to(0,0, 1-intensity_w,1)
+end
+
+function gl_plot(cpsh::ContinuousPlotHist, time_distribution_h::Number)
+  @with_pushed_matrix begin
+    gl_plot_time_dist(cpsh, time_distribution_h)
     gl_plot(cpsh)
-    if !isempty(cpsh.cp.data)
-      x,y = last(cpsh.cp.data)
-      hist = cpsh.h.lin_area
-      fy,ty = (hist.s, hist.s + hist.d*length(hist))
-      rx,ry = map_to_range(x,y, plot_range_of(cpsh.cp, fy,ty, time()))
-      glcolor(1,1,0)
-      @with_primitive GL_QUADS begin
-        vertices_rect_around(clamp(rx,0,1),clamp(ry,0,1), dot_size)
-      end
-    end
+  end
+end
+
+function gl_plot(cpsh::ContinuousPlotHist, time_distribution_h::Number,
+                 intensity_w::Number, colors::Vector)
+  @with_pushed_matrix begin
+    gl_plot_time_dist(cpsh, time_distribution_h)
+    gl_plot_pre_intensity(cpsh, intensity_w, colors)
+    gl_plot(cpsh)
   end
 end
