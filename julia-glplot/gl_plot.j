@@ -96,6 +96,9 @@ function gl_plot{T}(mode::Integer,thing::T,
     return
   end
   fx,fy,tx,ty = range
+  if fx==tx || tx==ty
+    return #TODO this should be some problem.
+  end
   inside(x,y) = (x>=fx && y>=fy && x<=tx && y<=ty)
   @with_pushed_matrix begin
     unit_frame_from(range)

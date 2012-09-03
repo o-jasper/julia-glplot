@@ -9,46 +9,40 @@
 
 #Averages together averages over powers of time.
 type PlotPwr
-  times_per::Uint8
-  duration:Float64
+  base::Uint8
+  duration::Float64
   next_x::Float64
   data::Array{(Float64, Uint8),1}
   last_i::Uint16
-  function PlotPwr(times_per::Integer, duration::Number)
-    @assert times_per< 256 && times_per>=2 
+
+  cur_y::Float64
+  cur_w::Float64
+
+  prop_w::Float32
+  function PlotPwr(base::Integer, duration::Number)
+    @assert base< 256 && base>=2 
     @assert duration>0
-    return new(uint8(times_per), float64(duration),mintype(Float64),
-               [(float64(0),false)], uint16(0))
+    return new(uint8(base), float64(duration),typemin(Float64),
+               Array((Float64,Uint8),0), uint16(0), 
+               float64(0),float64(0),
+               float64(1))
   end
 end
 
 PlotPwr(duration::Number) = PlotPwr(2,duration)
 
-function propagate_flip(arr::Array{(Float64, Bool),1}, times_per::Uint8)
-  y,times = arr[1]
-  if length(arr)<2 #Extend if needed.
-    push(arr, (float64(y/2),uint8(1))) #Know what to fill it with then.
-  else
-    y2,times = arr[2] #Otherwise average with it and maybe continue.
-    arr[2] = ((y+y2)/2, (times+1)%times_per)
-    if times+1 >= times_per #Effectively it counts up with time_per as base.
-      return 1+propagate_flip(arr[2:])
-    end
-  end
-  return 0
-end
-
 function incorporate(into::PlotPwr, x::Number, y::Number,w::Number)
-  cy, flip= into.data[1]
-  into.data = (w*y + cw*cy, flip)
+  into.cur_y = (into.cur_y + w*y)/(1+w)
+  i=0
   if x > into.next_x #Need to propagate.
+    for j = 1:int(1 + (x - into.next_x)/into.duration)
+      i = max(i, propagate_flip(into.data, into.base, into.cur_y,into.prop_w))
+    end
     into.next_x = x + into.duration
-    last_i = propagate_flip(into.data, into.times_per)
-    into.data[1] = (float64(0),0) #Reset the first one.
-    return last_i
   end
-  return 0
+  return i
 end
+#NOTE: it might not make sense to change the weight..
 incorporate(into::PlotPwr, x::Number, y::Number) = incorporate(into, x,y,1)
 
 #PlotPwr making histograms aswel.(Which, conveniently can be choosen.
@@ -64,13 +58,13 @@ end
 function incorporate{H}(into::PlotPwrHist{H}, x::Number, y::Number,w::Number)
   last_i = incorporate(into.p, x,y,w)
   for i = 1:min(length(into.state), last_i) 
-    local y,c = into.p.data[i] #Everything below `last_i` is new.
-    incorporate(into.h[i], y)
+    local cy,c = into.p.data[i] #Everything below `last_i` is new.
+    incorporate(into.h[i], cy)
   end
   if last_i>length(into.state) #List of histograms not long enough.
     hist = copy(into.zero)
     push(into.state, hist) #Make copy from zero histogram and incorporate.
-    local y,c = last(into.p.data)
-    incorporate(hist, y)
+    local cy,c = last(into.p.data)
+    incorporate(hist, cy)
   end
 end

@@ -40,17 +40,32 @@ function incorporate(h::Histogram, x::Number, step::Integer)
   return nothing
 end
 
-#Expanding histogram, it registers everything.(but potentially memory-prohibitive)
-# everything below does so too.
+#Expanding histogram, it registers everything.
+# (but potentially memory-prohibitive, if arbitrary size allowed)
+# HistogramLog expands unlimitedly, which shouldn't be too prohibitive due to
+# the logarithm.
 type HistogramExpanding
   h::Histogram
+  max_range::(Float64,Float64)
+  function HistogramExpanding(h::Histogram, max_range::(Number,Number))
+    fr,to = max_range
+    new(h, (float64(fr),float64(to)))
+  end
 end
+#TODO awful lot of constructors..
+HistogramExpanding(h::Histogram) = 
+    HistogramExpanding(h, (typemin(Float64), typemax(Float64)))
 
-HistogramExpanding(fr::Number,to::Number, n::Integer) =
-    HistogramExpanding(Histogram(fr, (to-fr)/n, n))
+HistogramExpanding(fr::Number,to::Number, n::Integer, 
+                   max_range::(Number, Number)) =
+    HistogramExpanding(Histogram(fr, (to-fr)/n, n), max_range)
+
+HistogramExpanding(s::Number,d::Number, max_range::(Number, Number)) =
+    HistogramExpanding(Histogram(float64(s),float64(d), zero(Array(Int64,0))),
+                       max_range)
 
 HistogramExpanding(s::Number,d::Number) =
-    HistogramExpanding(Histogram(float64(s),float64(d), zero(Array(Int64,0))))
+    HistogramExpanding(s,d, (typemin(Float64), typemax(Float64)))
 
 length(h::HistogramExpanding) = length(h.h)
 
@@ -61,6 +76,10 @@ range_of(h::HistogramExpanding) = range_of(h.h)
 plot_range_of(h::HistogramExpanding) = plot_range_of(h.h)
 
 function incorporate(h::HistogramExpanding, x::Number, step::Integer)
+  fr,to = h.max_range
+  if x<fr || x>to #Outside of range.
+    return nothing
+  end
   i = incorporate_i(h.h, x,step)
   if i!=nothing
     w = length(h.h.hist)
@@ -108,26 +127,26 @@ end
 
 #Histogram with linear part and expanding logarithmic around.
 #(records all)
-type HistogramFancy
+type HistogramLinArea
   lin_area::Histogram
   log::HistogramLog
 end
 
-max(h::HistogramFancy) = max(h.lin_area,h.log)
-min(h::HistogramFancy) = min(h.lin_area,h.log)
+max(h::HistogramLinArea) = max(h.lin_area,h.log)
+min(h::HistogramLinArea) = min(h.lin_area,h.log)
 
-HistogramFancy(fr::Number,to::Number, n::Integer, low::Number,e::Number) =
-    HistogramFancy(Histogram(fr,to,n),HistogramLog(low,e))
+HistogramLinArea(fr::Number,to::Number, n::Integer, low::Number,e::Number) =
+    HistogramLinArea(Histogram(fr,to,n),HistogramLog(low,e))
 
-HistogramFancy(fr::Number,to::Number, n::Integer, e::Number) =
-    HistogramFancy(fr,to, n, (to-fr)/n, e)
-HistogramFancy(fr::Number,to::Number, n::Integer) =
-    HistogramFancy(fr,to, n, 2/n)
+HistogramLinArea(fr::Number,to::Number, n::Integer, e::Number) =
+    HistogramLinArea(fr,to, n, (to-fr)/n, e)
+HistogramLinArea(fr::Number,to::Number, n::Integer) =
+    HistogramLinArea(fr,to, n, 2/n)
 
-function incorporate(h::HistogramFancy, x::Number, step::Integer)
+function incorporate(h::HistogramLinArea, x::Number, step::Integer)
   if incorporate(h.lin_area, x,step)!=nothing #If drops out
     incorporate(h.log, x,step)
   end
 end
 
-plot_range_of(h::HistogramFancy) = plot_range_of(h.lin_area)
+plot_range_of(h::HistogramLinArea) = plot_range_of(h.lin_area)

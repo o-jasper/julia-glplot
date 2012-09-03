@@ -18,8 +18,8 @@ done(h::HistogramExpanding,i::Integer) = done(h.h,i)
 #HistogramLog cannot be unambigously done; it is two histograms
 
 #Histogram just plots the linear area.
-pos(h::HistogramFancy,i::Integer) = pos(h.lin_area,i)
-done(h::HistogramFancy,i::Integer) = done(h.lin_area,i)
+pos(h::HistogramLinArea,i::Integer) = pos(h.lin_area,i)
+done(h::HistogramLinArea,i::Integer) = done(h.lin_area,i)
 
 #NOTE gl_plot_filled_box(Histogram,(NNNN),Number) works by a generic function
 # in plot_gl.j!

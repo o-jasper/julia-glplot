@@ -81,7 +81,7 @@ function incorporate(cp::ContinuousPlot, x::Number,y::Number,
   push(cp.data, (float64(x),float64(y)))
 #Get current parameters.
   cp.last_time = time
-  
+
   if drop_excess_p
     return drop_excess(cp)
   end
@@ -115,45 +115,55 @@ gl_plot(cp::ContinuousPlot, fy::Number,ty::Number, time::Number) =
 gl_plot(cp::ContinuousPlot, fy::Number,ty::Number) = 
     gl_plot(cp, fy,ty, time())
 
-#TODO a plot that histograms the input aswel, 
-#TODO and a 'averages over different lengths of time' plot.
-#Fancier version also histograms stuff.
-type ContinuousPlotHist
+#Fancy version also histograms stuff. And does a power plot.
+type FancyContinuousPlot
   cp::ContinuousPlot
-  h::HistogramFancy
-  arrival::HistogramFancy #Arrival time-difference histogram.
+  h::HistogramLinArea
+  arrival::HistogramLinArea #Arrival time-difference histogram.
   last_delta::Float64
+  pwr::PlotPwr
 end
 
-ContinuousPlotHist(duration::Number, fy::Number,ty::Number, n::Integer,
-                   arrival_range::Number)=
-    ContinuousPlotHist(ContinuousPlot(duration), 
-                       HistogramFancy(fy,ty,n),
-                       HistogramFancy(0,arrival_range, n), float64(0))
+FancyContinuousPlot(duration::Number, fy::Number,ty::Number, n::Integer,
+                    arrival_range::Number, plotpwr_duration::Number)=
+    FancyContinuousPlot(ContinuousPlot(duration), 
+                        HistogramLinArea(fy,ty,n),
+                        HistogramLinArea(0,arrival_range, n), float64(0),
+                        PlotPwr(plotpwr_duration))
 
-ContinuousPlotHist(duration::Number, fy::Number,ty::Number, n::Integer) =
-    ContinuousPlotHist(duration, fy,ty,n, duration/10)
-ContinuousPlotHist(duration::Number, fy::Number,ty::Number) =
-    ContinuousPlotHist(duration, fy,ty,100)
+FancyContinuousPlot(duration::Number, fy::Number,ty::Number, n::Integer,
+                    arrival_range::Number) =
+    FancyContinuousPlot(duration, fy,ty,n, arrival_range, duration/(256*n))
 
-function incorporate(cpsh::ContinuousPlotHist, x::Number,y::Number, 
+FancyContinuousPlot(duration::Number, fy::Number,ty::Number, n::Integer) =
+    FancyContinuousPlot(duration, fy,ty,n, duration/10)
+FancyContinuousPlot(duration::Number, fy::Number,ty::Number) =
+    FancyContinuousPlot(duration, fy,ty,100)
+
+function incorporate(cpsh::FancyContinuousPlot, x::Number,y::Number, 
                      drop_excess_p::Bool, time::Number)
   incorporate(cpsh.h, y)
   cpsh.last_delta = time - cpsh.cp.last_time #Order matters here.
   incorporate(cpsh.arrival, cpsh.last_delta)
 #And finally the continuous plot itself. 
-  incorporate(cpsh.cp, x,y, drop_excess_p, time)
+  dropped = incorporate(cpsh.cp, x,y, drop_excess_p, time)
+#Stuff it into the pwr plot.
+  for el in dropped
+    x,y = el
+    incorporate(cpsh.pwr, x,y)
+  end
 end
-incorporate(cpsh::ContinuousPlotHist,x::Number,y::Number,drop_excess_p::Bool)=
+incorporate(cpsh::FancyContinuousPlot,x::Number,y::Number,
+            drop_excess_p::Bool)=
     incorporate(cpsh, x,y, drop_excess_p,  time())
-incorporate(cpsh::ContinuousPlotHist, x::Number,y::Number) =
+incorporate(cpsh::FancyContinuousPlot, x::Number,y::Number) =
     incorporate(cpsh, x,y, true)
 
-gl_plot(cpsh::ContinuousPlotHist, range::(Number,Number,Number,Number))=
+gl_plot(cpsh::FancyContinuousPlot, range::(Number,Number,Number,Number))=
   gl_plot(cpsh.cp, range)
 
 #Continuous plot with distribution histogram with current actuality underneath
-function gl_plot(cpsh::ContinuousPlotHist)
+function gl_plot(cpsh::FancyContinuousPlot)
   hist = cpsh.h.lin_area
   (fy,ty) = hist.s, hist.s + hist.d*length(hist)
   glcolor(0.2,0.2,0.2) #TODO allow user to determine the colors
@@ -172,9 +182,7 @@ end
 # gl matrix accordingly.
 
 #Continuous plot with histogram and time-distribution histogram.
-function gl_plot_time_dist(cpsh::ContinuousPlotHist,
-                           time_distribution_h::Number)
-  h = time_distribution_h
+function gl_plot_time_dist(cpsh::FancyContinuousPlot, h::Number)
   const dot_size = 0.005
   @with_pushed_matrix begin #Time difference distribution plot.
     if h>0
@@ -218,29 +226,50 @@ end
 #  end
 
 #Continuous plot with a little space(potentially) for an intensity plot.
-function gl_plot_pre_intensity(cpsh::ContinuousPlotHist, 
-                               intensity_w::Number, colors::Vector)
+function gl_plot_pre_intensity(cpsh::FancyContinuousPlot, w::Number, 
+                               colors::Vector)
   @with_pushed_matrix begin
-    unit_frame_to(1-intensity_w,0, 1,1)
+    unit_frame_to(1-w,0, 1,1)
     glrotate(90)
     gltranslate(0,-1)
     gl_plot_bar_intensity(cpsh.h.lin_area, 1,colors)
   end
-  unit_frame_to(0,0, 1-intensity_w,1)
+  unit_frame_to(0,0, 1-w,1)
+end
+#Note that the data in there increase logithmically.
+function gl_plot_pwr(cpsh::FancyContinuousPlot, w::Number)
+  @with_pushed_matrix begin
+    unit_frame_to(w,0,0,1) #Inverted on x axis!
+    hist = cpsh.h.lin_area #TODO this range should be available by function?
+    (fy,ty) = (hist.s, hist.s + hist.d*length(hist))
+    gl_plot(cpsh.pwr, fy,ty)
+  end
+  unit_frame_to(w,0,1,1)
 end
 
-function gl_plot(cpsh::ContinuousPlotHist, time_distribution_h::Number)
+
+function gl_plot(cpsh::FancyContinuousPlot, time_distribution_h::Number)
   @with_pushed_matrix begin
     gl_plot_time_dist(cpsh, time_distribution_h)
     gl_plot(cpsh)
   end
 end
 
-function gl_plot(cpsh::ContinuousPlotHist, time_distribution_h::Number,
+function gl_plot(cpsh::FancyContinuousPlot, time_distribution_h::Number,
                  intensity_w::Number, colors::Vector)
   @with_pushed_matrix begin
     gl_plot_time_dist(cpsh, time_distribution_h)
     gl_plot_pre_intensity(cpsh, intensity_w, colors)
+    gl_plot(cpsh)
+  end
+end
+
+function gl_plot(cpsh::FancyContinuousPlot, time_distribution_h::Number,
+                 intensity_w::Number, colors::Vector, pwr_w::Number)
+  @with_pushed_matrix begin
+    gl_plot_time_dist(cpsh, time_distribution_h)
+    gl_plot_pwr(cpsh, pwr_w) #Below compensates for pwr_w.
+    gl_plot_pre_intensity(cpsh, intensity_w/(1-pwr_w), colors) 
     gl_plot(cpsh)
   end
 end

@@ -17,6 +17,10 @@ load("julia-glplot/plot_able.j")
 load("julia-glplot/gl_plot.j")
 load("julia-glplot/gl_plot_histogram.j")
 
+load("julia-glplot/util_fun.j")
+load("julia-glplot/plot_pwr.j")
+load("julia-glplot/gl_plot_pwr.j")
+
 load("julia-glplot/gl_plot_continuous.j")
 
 screen_width = 640
@@ -31,8 +35,9 @@ function run_test()
   init_stuff(screen_width,screen_height)
 
   next_add_t = time() -1
+  next_print_t = time() -1
 #  cpsh = ContinuousPlot(20.0)
-  cpsh = ContinuousPlotHist(20.0, 0,2)
+  cpsh = FancyContinuousPlot(20.0, 0,2)
 
   start = time()
   prev_time = time()
@@ -44,12 +49,16 @@ function run_test()
       wait_time = rand()/3
       next_add_t = time() + wait_time
     end
+    if time() > next_print_t
+#      println("$(length(cpsh.pwr.data)) $(cpsh.pwr.data)")
+      next_print_t += 1
+    end
   #Drawing stuff.
     @with_pushed_matrix begin
       unit_frame()
       unit_frame_to(0.1,0.1, 0.9,0.9)
       glcolor(1,1,1)
-      gl_plot(cpsh, 0.2,0.02, grayscale_color)
+      gl_plot(cpsh, 0.2,0.02, grayscale_color, 0.2)
 #      gl_plot_bar_intensity(cpsh.h.lin_area, 0.1,grayscale_color)
     end
     finalize_draw()

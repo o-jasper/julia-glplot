@@ -12,5 +12,12 @@ pos(p::PlotPwr, i::Integer)  = (i, p.data[i][1])
 length(p::PlotPwr) = length(p.data)
 done(p::PlotPwr, i::Integer) = (i > length(p))
 
+#Getting the plot range for you:
+gl_plot(p::PlotPwr, f::Number,t::Number) =
+    gl_plot(p, (1,f, length(p.data),t))
+gl_plot(p::PlotPwr) =
+    gl_plot(p, min(p.data),max(p.data))
+
 #TODO bar intensity plot in plot_gl and then multiple of those
 # for PlotPwrHist{H}
+
