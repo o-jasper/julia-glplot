@@ -2,6 +2,8 @@
 load("load_so.j")
 load("get_c.j")
 
+load("util/util.j")
+
 load("autoffi/gl.j")
 load("gl_util.j")
 
