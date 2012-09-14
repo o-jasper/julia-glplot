@@ -140,24 +140,27 @@ end
 gl_plot{T}(thing::T, range::(Number,Number,Number,Number)) =
     gl_plot(GL_LINE_STRIP, thing::T, range)
 
+function interpolate_color(x, f,t, colors)
+  d = (t-f)/(length(colors)+1)
+  i = clamp(int(ceil((x-f)/d)), 1,length(colors))
+  if i == length(colors)
+    return colors[i] #==last(colors)
+  else
+    r,g,b = colors[i] #Interpolate color.
+    nr,ng,nb = colors[i+1]
+    frac = (x-f)/d + 1- i
+    return ((1-frac)*r + frac*nr, 
+            (1-frac)*g + frac*ng, 
+            (1-frac)*b + frac*nb)
+  end
+end
+
 #'bar intensity plot'.
 function gl_plot_bar_intensity{T}(thing::T, draw_yrange::(Number,Number),
                                   range::(Number,Number,Number,Number),
                                   colors::Array{(Number,Number,Number),1})
   fx,fy, tx,ty = range
-  d = (ty-fy)/(length(colors)+1)
-  function cur_color(y)
-    i = clamp(int(ceil((y-fy)/d)), 1,length(colors))
-#    println((i, (y-fy)/d +1- i,y))
-    if i == length(colors)
-      return colors[i] #==last(colors)
-    else
-      r,g,b = colors[i] #Interpolate color.
-      nr,ng,nb = colors[i+1]
-      f = (y-fy)/d +1- i
-      return ((1-f)*r + f*nr, (1-f)*g + f*ng, (1-f)*b + f*nb)
-    end
-  end
+  cur_color(y) = interpolate_color(y, fy,ty, colors)
   @with_pushed_matrix begin
     draw_fy,draw_ty = draw_yrange
     unit_frame_from(fx,draw_fy, tx,draw_ty)

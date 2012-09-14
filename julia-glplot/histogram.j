@@ -34,16 +34,19 @@ function incorporate(h::Histogram, x::Number, step::Integer)
   end
 end
 
-function gnuplot_write(h::Histogram, to::IOStream)
+#TODO csv_write with positions of each bin.
+function csv_write(h::Histogram, to::IOStream, between::String)
   len = size(h.hist)
-  write(to, "#Histogram
-#s $(h.s) d $(h.d) len $len")
+  b = between
+  write(to, "#Histogram\n#s $(h.s)$(b)d $(h.d)$(b)len $len")
   for i = 1:len
     write(to, "\n$(h.hist[i])")
   end
 end
-gnuplot_write{H}(h::H, to::String) = #!
-    @with_open_file stream to "w" gnuplot_write(h, stream)
+csv_write{H}(h::H, to::String, between::String) = #!
+    @with_open_file stream to "w" csv_write(h, stream, between)
+gnuplot_write{H,To}(h::H, to::To) = #!
+    csv_write(h,to, "\t")
 
 #A reshape that works. (until the julia one starts working again..)
 function working_reshape{T}(arr::Array{T,1}, newlen::Integer)
@@ -135,11 +138,16 @@ function incorporate(h::HistogramExpanding, x::Number, step::Integer)
   h.hist[i] += step
   return nothing
 end
-#TODO option to write it as if the whole range has stuff.
-function gnuplot_write(h::HistogramExpanding, to::IOStream)
+#TODO option to write it as if the whole range has stuff
+function csv_write(h::HistogramExpanding, to::IOStream)
   min,max = h.max_range
   write("#HistogramExpanding\n#min $min max $max\n")
-  gnuplot_write(h.h) #Just passes it on.  
+  len = size(h.hist) #Code repeat.. (ah well)
+  b = between
+  write(to, "#s $(h.s)$(b)d $(h.d)$(b)len $len")
+  for i = 1:len
+    write(to, "\n$(h.hist[i])")
+  end
 end
 
 #Logarithmic histogram. (The log typically dampens the memory use a lot)

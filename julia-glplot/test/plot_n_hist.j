@@ -3,6 +3,8 @@ load("load_so.j")
 load("get_c.j")
 load("sdl_bad_utils/init_stuff.j")
 
+load("util/util.j")
+
 load("autoffi/gl.j")
 load("gl_util.j")
 
