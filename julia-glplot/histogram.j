@@ -1,5 +1,5 @@
 #
-#  Copyright (C) 06-08-2012 Jasper den Ouden.
+#  Copyright (C) 14-09-2012 Jasper den Ouden.
 #
 #  This is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published
@@ -24,6 +24,9 @@ min(h::Histogram) = min(h.hist)
 
 range_of(h::Histogram)      = (h.s,min(h), h.s + h.d*length(h),max(h))
 plot_range_of(h::Histogram) = (h.s,0, h.s + h.d*length(h),max(h))
+
+#Position and counts for an index.
+pos_at(h::Histogram, i::Integer) = (h.s + h.d*i, h.hist[i])
 
 incorporate(h, x::Number) = incorporate(h, x,1)
 
@@ -95,13 +98,11 @@ end
 # HistogramLog expands unlimitedly, which shouldn't be too prohibitive due to
 # the logarithm.
 type HistogramExpanding
-  hist::Array{Int64,1}
-  s::Float64
-  d::Float64
+  hist::Histogram
   max_range::(Float64,Float64)
   function HistogramExpanding(h::Histogram, max_range::(Number,Number))
     fr,to = max_range
-    new(h.hist, h.s,h.d, (float64(fr),float64(to)))
+    new(h, (float64(fr),float64(to)))
   end
 end
 #TODO awful lot of constructors..
@@ -125,17 +126,21 @@ max(h::HistogramExpanding) = max(h.hist)
 min(h::HistogramExpanding) = min(h.hist)
 
 range_of(h::HistogramExpanding) = range_of(h.hist)
-plot_range_of(h::HistogramExpanding) = (h.s,0, h.s + h.d*length(h),max(h))
+plot_range_of(h::HistogramExpanding) = plot_range_of(h.hist)
+
+#Position and counts for an index.(Varies as it expands!)
+pos_at(h::HistogramExpanding, i::Integer) = pos_at(h.hist,i)
 
 function incorporate(h::HistogramExpanding, x::Number, step::Integer)
   fr,to = h.max_range
   if x<fr || x>to #Outside of range.
     return nothing
   end
-  i,s,arr = index_expand_if_needed(h.hist, h.s,h.d, x, int64(0))
-  h.hist = arr
-  h.s = s
-  h.hist[i] += step
+  i,s,arr = index_expand_if_needed(h.hist.hist, h.hist.s,h.hist.d, 
+                                   x, int64(0))
+  h.hist.hist = arr
+  h.hist.s = s
+  h.hist.hist[i] += step
   return nothing
 end
 #TODO option to write it as if the whole range has stuff
@@ -149,6 +154,8 @@ function csv_write(h::HistogramExpanding, to::IOStream)
     write(to, "\n$(h.hist[i])")
   end
 end
+
+#TODO re-endow with histograms.
 
 #Logarithmic histogram. (The log typically dampens the memory use a lot)
 type HistogramLog

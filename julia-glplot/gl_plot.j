@@ -1,5 +1,5 @@
 #
-#  Copyright (C) 06-08-2012 Jasper den Ouden.
+#  Copyright (C) 14-09-2012 Jasper den Ouden.
 #
 #  This is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published
@@ -10,44 +10,41 @@
 function gl_plot_under{T}(mode::Integer, thing::T, 
                           range::(Number,Number,Number,Number),
                           to::Number, rectangular::Bool)
-  function fpos(j::Integer)
-    x,y = pos(thing,j,range)
-    assert(isa(x,Number) && isa(y,Number))
-    return (float64(x),float64(y))
-  end
-  fx,fy,tx,ty = range
+  thing = inform_of_range(thing, range)
+  fx,fy,tx,ty = range #TODO keep in range on y dir.
   @with_pushed_matrix begin
     unit_frame_from(range)
     if mode==GL_QUAD_STRIP && !rectangular
       glbegin(mode)
     end
-    j::Int64 = 1
-    px,py = fpos(j)
-    while px<fx && !done(thing,j,range) #Find the start.
-      x,y = fpos(j)
-      px = x
-      py = y
+    j = 1
+    px,py = float64(0),float64(0) #Find first one.
+    for el in thing
+      px,py = el
+      if px >= fx
+        break
+      end
       j+=1
-    end #TODO if rectangular, start it up?
-    i::Int64 = j
-    while !done(thing,i,range) #Plot
+    end 
+    vertex(x,y) = #! #Bit inefficient, clamping all of them.
+        glvertex(clamp(x, fx,tx),clamp(y,fy,ty))
+    
+    for el in after_i(thing, j) #All those after the jth.
       if mode!=GL_QUAD_STRIP || rectangular
         glbegin(mode)
       end
-      x,y = fpos(i)
-      glvertex(x,y)
-      glvertex(x,float64(to))
+      x,y = el
+      vertex(x,y)
+      vertex(x,float64(to))
       if mode!=GL_QUAD_STRIP || rectangular
-        glvertex(px,float64(to))
-        glvertex(px,rectangular ? y : py)
+        vertex(px,float64(to))
+        vertex(px, rectangular ? y : py)
         glend()
       end
-      if x>tx #Until at end.
+      if x>tx #Stop at end.
         break
       end
-      px=x
-      py=y
-      i+=1
+      px,py = el
     end
     if mode==GL_QUAD_STRIP && !rectangular
       glend()
@@ -73,9 +70,10 @@ gl_plot_box{T}(thing::T, range::(Number,Number,Number,Number), to::Number) =
 gl_plot_box{T}(thing::T, range::(Number,Number,Number,Number)) =
     gl_plot_box(thing, range, 0, true)
 
-#Returns the x where the line hits y=0
+#TODO pretty sure it is wrong.
+#Returns the x where the line hits y=0 
 function exit_pos(sx,sy, ex,ey, range, epsilon)
-  fx,fy,tx,ty = range #TODO pretty sure it is wrong.
+  fx,fy,tx,ty = range 
   
   dx = ex-sx #Fractions of x-passing-options.
   f_fx,f_tx = (abs(dx)>epsilon ? ((sx-fx)/dx, (tx-sx)/dx) : (2,2))
@@ -92,25 +90,22 @@ exit_pos(sx,sy,ex,ey, range) = exit_pos(sx,sy,ex,ey, range, 1e-9)
 
 function gl_plot{T}(mode::Integer,thing::T, 
                     range::(Number,Number,Number,Number))
-  if done(thing,1,range)
-    return
-  end
+  thing = inform_of_range(thing, range)
   fx,fy,tx,ty = range
-  if fx==tx || tx==ty
+  if fx==tx || fy==ty
     return #TODO this should be some problem.
   end
   inside(x,y) = (x>=fx && y>=fy && x<=tx && y<=ty)
   @with_pushed_matrix begin
     unit_frame_from(range)
-    px,py = pos(thing,1,range)
+    px,py = thing[1]
     inside_p::Bool = inside(px,py)
     if inside_p
       glbegin(mode)
       glvertex(px,py)
     end
-    i=2
-    while !done(thing,i,range)
-      x,y = pos(thing,i,range)
+    for el in after_i(thing,2)
+      x,y = el
       if inside_p
         if inside(x,y) #Staying inside.
           glvertex(x,y)
@@ -126,9 +121,7 @@ function gl_plot{T}(mode::Integer,thing::T,
           inside_p = true
         end
       end
-      px=x
-      py=y
-      i+=1
+      px,py = el
     end
     if inside_p #End any current lines.
       glend()
@@ -156,30 +149,30 @@ function interpolate_color(x, f,t, colors)
 end
 
 #'bar intensity plot'.
-function gl_plot_bar_intensity{T}(thing::T, draw_yrange::(Number,Number),
-                                  range::(Number,Number,Number,Number),
-                                  colors::Array{(Number,Number,Number),1})
+function gl_plot_bar_intensity{T}(thing::T,
+     range::(Number,Number,Number,Number),
+     colors::Array{(Number,Number,Number), 1}, h::Number)
+  thing = inform_of_range(thing, range)
   fx,fy, tx,ty = range
   cur_color(y) = interpolate_color(y, fy,ty, colors)
   @with_pushed_matrix begin
-    draw_fy,draw_ty = draw_yrange
-    unit_frame_from(fx,draw_fy, tx,draw_ty)
-    @with_primitive GL_QUAD_STRIP begin
-      i = 1
-      while !done(thing,i,range)
-        x,y = pos(thing,i,range)
-        glcolor(cur_color(y))
-        glvertex(x,0) #TODO more vertices if 'hard edge' desired.
-        glvertex(x,1)
-        i+=1
-      end
+    unit_frame_from(fx,0, tx,1)
+    @with_primitive GL_QUAD_STRIP for el in thing
+      x,y = el
+      glcolor(cur_color(y))
+      glvertex(x,0) #TODO more vertices if 'hard edge' desired.
+      glvertex(x,1)
     end
   end
 end
-gl_plot_bar_intensity{T}(thing::T, draw_w::Number,
-                      range::(Number,Number,Number,Number),
-                      colors::Array{(Number,Number,Number),1}) =
-    gl_plot_bar_intensity(thing, (0,draw_w), range,colors)
+
+function gl_plot_bar_intensity{T}(thing::T,
+                                  colors::Array{(Number,Number,Number), 1}, 
+                                  h::Number)
+  gl_plot_bar_intensity(thing, range_of(thing), colors,h)
+end
+gl_plot_bar_intensity{T}(thing::T,colors::Array{(Number,Number,Number), 1}) =
+    gl_plot_bar_intensity(thing,colors, 1)
 
 const grayscale_color = [(0,0,0), (1,1,1)]
 #TODO more color themes.

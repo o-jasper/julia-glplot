@@ -11,12 +11,13 @@ load("gl_util.j")
 load("sdl_bad_utils/sdl_event.j")
 
 load("julia-glplot/histogram.j")
+load("julia-glplot/iter_histogram.j")
 
-load("julia-glplot/plot_able.j")
-load("julia-glplot/plot_gl.j")
-load("julia-glplot/plot_histogram_gl.j")
+load("julia-glplot/iter_able.j")
+load("julia-glplot/gl_plot.j")
+load("julia-glplot/gl_plot_histogram.j")
 
-function run_this ()
+function run_this()
   screen_width = 640
   screen_height = 640
   init_stuff()
@@ -38,14 +39,14 @@ function run_this ()
       function sqr(x)
         return x^2
       end
-      @with_pushed_matrix gl_plot_under(PlotFun(sqr), (-1,0,+1,+1))
+      @with_pushed_matrix gl_plot_under(PlotPath(sqr, -1,1), (-1,0,+1,+1))
       glcolor(1,0,0)
-      @with_pushed_matrix gl_plot(PlotFun(sqr), (-1,0,+1,+1))
+      @with_pushed_matrix gl_plot(PlotPath(sqr), (-1,0,+1,+1))
       
       function circle(a)
         return (cos(6.28*a),sin(6.28*a))
       end
-      @with_pushed_matrix gl_plot(circle, (-1,-1,+1,+1))
+      @with_pushed_matrix gl_plot(PlotPath(circle,0,1), (-1,-1,+1,+1))
       
       glcolor(1,1,1)
       @with_pushed_matrix gl_plot(h)#, (0,0, 10,max(h)))

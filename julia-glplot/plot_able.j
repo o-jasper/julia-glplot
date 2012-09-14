@@ -35,9 +35,9 @@ end
 PlotPath(fun::Function, s::Number,t::Number,n::Integer) =
     PlotPath(fun,float64(s),float64((t-s)/n), int32(n))
 PlotPath(fun::Function, s::Number,t::Number) =
-    PlotPath(fun,float64(s),float64((t-s)/n), int32(100))
-
-PlotPath(fun::Function) = PlotPath(fun, 0,1, int32(100))
+    PlotPath(fun, s,t, 100)
+PlotPath(fun::Function) = 
+    PlotPath(fun, 0,1)
 
 pos(pf::PlotPath, i::Integer) = pf.fun(pf.s + pf.step*i)
 done(pf::PlotPath, i::Integer) = (i> pf.n)
@@ -80,8 +80,11 @@ pos{T}(pf::PostFun{T}, i::Integer, range::(Number,Number,Number,Number)) =
 #    gl_plot(pf.thing, range)
 
 #Some uses of PostFun for logarithmic plots.
-log_x{T}(thing::T)  = PostFun(function(v) return (log10(v[1]), v[2]) end, thing)
-log_y{T}(thing::T)  = PostFun(function(v) return (v[1], log10(v[2])) end, thing)
-log_xy{T}(thing::T) = PostFun(function(v) return (log10(v[1]), log10(v[2])) end,
-                              thing)
+log_x{T}(thing::T)  = 
+    PostFun(function(v) return (log10(v[1]), v[2]) end, thing)
+log_y{T}(thing::T)  = 
+    PostFun(function(v) return (v[1], log10(v[2])) end, thing)
+log_xy{T}(thing::T) = 
+    PostFun(function(v) return (log10(v[1]), log10(v[2])) end,
+            thing)
 

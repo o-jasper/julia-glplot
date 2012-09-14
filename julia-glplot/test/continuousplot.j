@@ -14,8 +14,9 @@ load("sdl_bad_utils/sdl_event.j")
 load("util/geom.j")
 
 load("julia-glplot/histogram.j")
+load("julia-glplot/iter_histogram.j")
 
-load("julia-glplot/plot_able.j")
+load("julia-glplot/iter_able.j")
 load("julia-glplot/gl_plot.j")
 load("julia-glplot/gl_plot_histogram.j")
 
@@ -60,7 +61,7 @@ function run_test()
       unit_frame()
       unit_frame_to(0.1,0.1, 0.9,0.9)
       glcolor(1,1,1)
-      gl_plot(cpsh, 0.2,0.02, grayscale_color, 0.2)
+      gl_plot(cpsh, 0.2,0.02, grayscale_color)
 #      gl_plot_bar_intensity(cpsh.h.lin_area, 0.1,grayscale_color)
     end
     finalize_draw()

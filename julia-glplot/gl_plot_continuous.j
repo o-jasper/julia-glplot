@@ -1,5 +1,5 @@
 #
-#  Copyright (C) 06-08-2012 Jasper den Ouden.
+#  Copyright (C) 14-09-2012 Jasper den Ouden.
 #
 #  This is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published
@@ -232,7 +232,7 @@ function gl_plot_pre_intensity(cpsh::FancyContinuousPlot, w::Number,
     unit_frame_to(1-w,0, 1,1)
     glrotate(90)
     gltranslate(0,-1)
-    gl_plot_bar_intensity(cpsh.h.lin_area, 1,colors)
+    gl_plot_bar_intensity(cpsh.h.lin_area, colors)
   end
   unit_frame_to(0,0, 1-w,1)
 end
