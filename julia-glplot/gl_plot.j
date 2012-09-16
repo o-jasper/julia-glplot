@@ -17,23 +17,21 @@ function gl_plot_under{T}(mode::Integer, thing::T,
     if mode==GL_QUAD_STRIP && !rectangular
       glbegin(mode)
     end
-    j = 1
     px,py = float64(0),float64(0) #Find first one.
-    for el in thing
+    el,iter_state = next(thing,start(thing)) #_Manually_ using the iterator.
+    px,py = el
+    while px < fx && !done(thing,iter_state)
+      el,iter_state = next(thing,iter_state)
       px,py = el
-      if px >= fx
-        break
-      end
-      j+=1
     end 
     vertex(x,y) = #! #Bit inefficient, clamping all of them.
         glvertex(clamp(x, fx,tx),clamp(y,fy,ty))
     
-    for el in after_i(thing, j) #All those after the jth.
+    while !done(thing,iter_state)
       if mode!=GL_QUAD_STRIP || rectangular
         glbegin(mode)
       end
-      x,y = el
+      (x,y),iter_state = next(thing,iter_state)
       vertex(x,y)
       vertex(x,float64(to))
       if mode!=GL_QUAD_STRIP || rectangular
@@ -44,7 +42,7 @@ function gl_plot_under{T}(mode::Integer, thing::T,
       if x>tx #Stop at end.
         break
       end
-      px,py = el
+      px,py = (x,y)
     end
     if mode==GL_QUAD_STRIP && !rectangular
       glend()
@@ -97,15 +95,15 @@ function gl_plot{T}(mode::Integer,thing::T,
   end
   inside(x,y) = (x>=fx && y>=fy && x<=tx && y<=ty)
   @with_pushed_matrix begin
-    unit_frame_from(range)
-    px,py = thing[1]
+    unit_frame_from(range) #_Manually_ using the iterator.
+    (px,py),iter_state = next(thing,start(thing)) 
     inside_p::Bool = inside(px,py)
     if inside_p
       glbegin(mode)
       glvertex(px,py)
     end
-    for el in after_i(thing,2)
-      x,y = el
+    while !done(thing, iter_state)
+      (x,y),iter_state = next(thing,iter_state)
       if inside_p
         if inside(x,y) #Staying inside.
           glvertex(x,y)
@@ -121,7 +119,7 @@ function gl_plot{T}(mode::Integer,thing::T,
           inside_p = true
         end
       end
-      px,py = el
+      px,py = (x,y)
     end
     if inside_p #End any current lines.
       glend()

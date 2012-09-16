@@ -10,8 +10,11 @@ load("gl_util.j")
 
 load("sdl_bad_utils/sdl_event.j")
 
-load("julia-glplot/histogram.j")
-load("julia-glplot/iter_histogram.j")
+load("util/ExpandingArray.j")
+load("julia-glplot/Field.j")
+
+load("julia-glplot/Histogram.j")
+#load("julia-glplot/iter_histogram.j")
 
 load("julia-glplot/iter_able.j")
 load("julia-glplot/gl_plot.j")
@@ -27,7 +30,7 @@ function run_this()
   mx()  = mx(mouse_x())
   my()  = my(mouse_y())
 
-  h = Histogram(0,10,20)
+  h = Histogram(0.0,10.0, 20)
   for n = 1:2000
     incorporate(h, randexp())
   end
@@ -49,6 +52,7 @@ function run_this()
       @with_pushed_matrix gl_plot(PlotPath(circle,0,1), (-1,-1,+1,+1))
       
       glcolor(1,1,1)
+      #println(plot_range_of(h))
       @with_pushed_matrix gl_plot(h)#, (0,0, 10,max(h)))
     end
     

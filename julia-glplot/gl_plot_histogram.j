@@ -1,5 +1,5 @@
 #
-#  Copyright (C) 14-09-2012 Jasper den Ouden.
+#  Copyright (C) 16-09-2012 Jasper den Ouden.
 #
 #  This is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published
@@ -10,20 +10,15 @@
 #NOTE gl_plot_filled_box(Histogram,(NNNN),Number) works by a generic function
 # in plot_gl.j!
 
-#HistogramExpanding has to tell it to look at the Histogram object inside.
-gl_plot(h::HistogramExpanding, range::(Number,Number,Number,Number), 
-        box_to::Number) =
-    gl_plot_box(h.h, range, box_to)
-
-gl_plot(h::HistogramTypes,
-        range::(Number,Number,Number,Number), box_to::Number) =
+gl_plot{IArr}(h::Histogram{IArr},
+              range::(Number,Number,Number,Number), box_to::Number) =
     gl_plot_box(h, range, box_to)
-gl_plot(h::HistogramTypes, range::(Number,Number,Number,Number)) = 
+gl_plot{IArr}(h::Histogram{IArr}, range::(Number,Number,Number,Number)) = 
     gl_plot(h,range, range[2])
 
-gl_plot(h::HistogramTypes, box_to::Number) = 
+gl_plot{IArr}(h::Histogram{IArr}, box_to::Number) = 
     gl_plot(h,plot_range_of(h), box_to)
-gl_plot(h::HistogramTypes) =
+gl_plot{IArr}(h::Histogram{IArr}) =
     gl_plot(h,plot_range_of(h), min(h))
 
 #Generic guys to fit on all the histograms.(and more?)
@@ -41,6 +36,5 @@ gl_plot_filled_box{H}(h::H) =
 #gl_plot_under{H}(h::H, range::(Number,Number,Number,Number)) =
 #    gl_plot_under(h,range)
 
-gl_plot_under{H}(h::H,to::Number) = gl_plot_under(h.hist,plot_range_of(h),to)
-gl_plot_under{H}(h::H)            = gl_plot_under(h,plot_range_of(h))
-gl_plot_above{H}(h::H)            = gl_plot_above(h,plot_range_of(h))
+gl_plot_under{H}(h::H,to::Number) = gl_plot_under(h,plot_range_of(h),to)
+gl_plot_under{H}(h::H)            = gl_plot_under(h,plot_range_of(h), 0)
