@@ -15,66 +15,73 @@ type Field2d{IArr2d} #2D field. (indexable array 2d)
   arr::IArr2d
 end
 
-Field2d(fx::Number,fy::Number, tx::Number,ty::Number,
-        w::Integer,h::Integer, T) = 
-    Field2d{IArr2d}(float64(fx),float64(fy), 
-               float64((tx-fx)/w),float64((ty-fy)/w),
-               zero(Array(T, w,h)))
+Field2d{IArr2d}(sx::Number,sy::Number, dx::Number,dy::Number, arr2d::IArr2d) =
+    Field2d(float64(sx),float64(sy), float64(dx),float64(dy), arr2d)
 
-size{IArr2d}(f::Field2d{IArr2d}) = size(f.arr)
+#size{IArr2d}(f::Field2d{IArr2d}) = size(f.arr)
+
+#Explicity ask for index.
+ref_i{IArr2d}(f::Field2d{IArr2d}, i::Integer,j::Integer) =
+    f.arr[i,j]
+assign_i{T,IArr2d}(f::Field2d{IArr2d}, to::T, i::Integer,j::Integer) = #!
+    (f.arr[i,j] = to)
+
 max{IArr2d}(f::Field2d{IArr2d})  = max(f.arr) #Only for <:Number
 min{IArr2d}(f::Field2d{IArr2d})  = min(f.arr)
 
-ref{T,I<:Integer}(f::Field2d{IArr2d}, i::I,j::I) = f.arr[i,j]
-assign{T,I<:Integer}(f::Field2d{IArr2d}, to::N, i::I,j::I) = #!
-    (f.arr[i,j] = to)
+ref{IArr2d}(f::Field2d{IArr2d}, x::Number,y::Number)   = 
+    ref_i(f, int((x-f.sx)/f.dx), int((y-f.sy)/f.dy))
+assign{T,IArr2d}(f::Field2d{IArr2d}, to::T, x::Number,y::Number) = #!
+    assign_i(f, to, int((x-f.sx)/f.dx), int((y-f.sy)/f.dy))
 
-ref{T,N<:Number}(f::Field2d{IArr2d}, x::N,y::N)   = 
-    f.arr[int((x-f.sx)/f.dx), int((y-f.sy)/f.dy)]
-set{T,N<:Number}(f::Field2d{IArr2d}, to::N, x::N,y::N) = #!
-    (f.arr[int((x-f.sx)/f.dx), int((y-f.sy)/f.dy)] = to)
+#Iterating it. TODO make continuous iter work on it?
+#Note: Gives you a row in the form of a Field{IArr}
+start{IArr2d}(f::Field2d{IArr2d}) = start(f.arr)
+done{IArr2d,State}(f::Field2d{IArr2d},s::State) = done(f.arr,s)
+function next{IArr2d,State}(f::Field2d{IArr2d}, s::State)
+  (i,v),next_state = next(f.arr,s)
+ #Make it position, state.
+  return ((f.sy + f.dy*i, Field(f.sx,f.dx, v)), next_state)
+end
 
-#TODO for <:Number the below.
+# `dlmwrite_iter` will write (x,y,value)'s, we want just z's, hence this:
+# Actually, it basically for reading with gnuplot
 
-#Write output for gnuplot. 
-#TODO make 1d histograms work the same way.
-#function gnuplot_write(f::Field2d, to::IOStream, 
-#                       range::(Number,Number, Number,Number))
-#  write(to, "#Field2d\n#s $(f.sx,f.sy) d $(f.dx,f.dy) "
-#  fx,fy, tx,ty = range
-#  function write_zeros(nx)
-#    for i = 1:nx
-#      write(to,"0\t")
-#    end
-#  end
-#  function write_zeros_lines(ny)
-#    nx = int((f.tx-f.fy)/f.dy)
-#    for j=1:ny
-#      write_zeros(nx)
-#      write(to,"\n\n")
-#    end
-#  end
-#  write_zeros_lines(max(0,int((f.sy-fy)/f.dy))) #y-leading zeros.
-#  to_j = int((ty-sy)/f.dy)
-#  actual_j = min(length(f.arr), to_j)
-#  for j = 1:actual_j
-#    sx,arr = f.arr[j]
-#    write_zeros(max(0,int((sx-fx)/f.dx))) #x-leading zeros.
-#
-#    to_i = int((tx-sx)/f.dx)
-#    actual_i = min(length(arr), to_i) #The elements themselves
-#    for i = 1:actual_i
-#      write(to, "$(arr[i])\t")
-#    end
-#    write_zeros(max(0, to_i - actual_i) #x-zeros after.
-#  end
-#  write_zeros_lines(max(0, to_j - actual_j)) #y-zeros after.
-#end
-#
-#gnuplot_write(f::Field2d, to::IOStream, max_range_p::Bool) = #!
-#    gnuplot_write(h,to, max_range ? f.max_range : cur_range(h))
-#gnuplot_write{R}(f::Field2d, to::String, range_something::R) = #!
-#    @with_open_file stream to "w" gnuplot_write(h,stream,range_something)
-#gnuplot_write{S}(f::Field2d, to::S) = #!
-#    gnuplot_write(h, to, true)
-#
+#Write as matrix, not meant for sparse stuff!
+function dlmwrite_any{IArr2d}(to::IOStream, f::Field2d{IArr2d}, 
+                              delim::String,line_delim::String)
+  write(to, "# sx $(f.sx) sy $(f.sy) dx $(f.dx) dy $(f.dy)\n")
+  si,sj = min_i(f.arr),min_j(f.arr)
+  write(to, "# si $si sj $sj\n")
+  for i = si:max_i(f.arr)
+    for j = sj:max_j(f.arr)
+      write(to, "$(ref_i(f, i,j))$delim")
+    end
+    write(to, line_delim)
+  end
+end
+
+dlmwrite_any{IArr2d}(file::String, f::Field2d{IArr2d}) = 
+    @with_open_file stream file "w" dlmwrite_any(stream, f, "\t","\n")
+
+#Write it as a list of points.
+function dlmwrite_pointlist{IArr2d}(to::IOStream, f::Field2d{IArr2d}, 
+                              between_delim::String, delim::String,
+                              line_delim::String)
+  for row in f
+    x,f = row
+    for el in f
+      y,v = el
+      write(to, "$x$between_delim$y$between_delim$v$delim")
+    end
+    write(to, line_delim)
+  end
+end
+dlmwrite_pointlist{IArr2d}(file::String, f::Field2d{IArr2d}, 
+                           between_delim::String, delim::String,
+                           line_delim::String) =
+    @with_open_file stream file "w" dlmwrite_pointlist(stream,f,between_delim,
+                                                       delim, line_delim)
+
+dlmwrite_pointlist{IArr2d,To}(to::To, f::Field2d{IArr2d}) =
+    dlmwrite_pointlist(to, f, "\t","\n","\n\n")

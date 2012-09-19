@@ -165,7 +165,6 @@ gl_plot(cpsh::FancyContinuousPlot, range::(Number,Number,Number,Number))=
 #Continuous plot with distribution histogram with current actuality underneath
 function gl_plot(cpsh::FancyContinuousPlot)
   hist = cpsh.h.lin_area
-  (fy,ty) = hist.s, hist.s + hist.d*length(hist)
   glcolor(0.2,0.2,0.2) #TODO allow user to determine the colors
                        # (..linewidth, etc) throughout
   @with_pushed_matrix begin #And the histogram rotated 90 degrees.
@@ -174,7 +173,7 @@ function gl_plot(cpsh::FancyContinuousPlot)
     gl_plot_filled_box(hist)
   end
   glcolor(1,0,0)
-  gl_plot(cpsh.cp, fy,ty)
+  gl_plot(cpsh.cp, hist.f,hist.t)
 end
 
 #TODO Can this be done more cleanly..
@@ -236,7 +235,8 @@ function gl_plot_pre_intensity(cpsh::FancyContinuousPlot, w::Number,
   end
   unit_frame_to(0,0, 1-w,1)
 end
-#Note that the data in there increase logithmically.
+#Note that the data in there increases logithmically.
+#TODO better version.
 function gl_plot_pwr(cpsh::FancyContinuousPlot, w::Number)
   @with_pushed_matrix begin
     unit_frame_to(w,0,0,1) #Inverted on x axis!

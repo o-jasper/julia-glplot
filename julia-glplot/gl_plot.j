@@ -167,7 +167,7 @@ end
 function gl_plot_bar_intensity{T}(thing::T,
                                   colors::Array{(Number,Number,Number), 1}, 
                                   h::Number)
-  gl_plot_bar_intensity(thing, range_of(thing), colors,h)
+  gl_plot_bar_intensity(thing, plot_range_of(thing), colors,h)
 end
 gl_plot_bar_intensity{T}(thing::T,colors::Array{(Number,Number,Number), 1}) =
     gl_plot_bar_intensity(thing,colors, 1)

@@ -4,6 +4,10 @@
 #Depreciated. TODO remove.
 isnothing(thing) = isequal(thing,nothing)
 
+#TODO a macro, just `with` that uses `end_with` at the end.
+# `@with stream = open(..) begin .. end` would use:
+#end_with(io::IOStream) = close(io)
+
 #Do stuff with a file open, closing it afterward `file` and `mode` correspond
 # to arguments of `open`
 macro with_open_file(stream_var,file, mode, body)

@@ -9,7 +9,8 @@
 
 #Using a field as a histogram. Faster, but might expand in memory badly if
 # data range big.(The histogram allows you to provide a range.)
-incorporate{IArr}(f::Field{IArr}, x::Number, step::Integer) = #!
+incorporate{H}(h::H, x::Number) = incorporate(h, x,1)
+incorporate{IArr}(f::Field{IArr}, x, step) = #!
     (f[x] += step)
 
 # histogram
@@ -42,11 +43,10 @@ plot_range_of{IArr}(h::Histogram{IArr}) = (h.f,0, h.t,max(h))
 ref{IArr,N<:Number}(h::Histogram{IArr}, x::N) = h.field[x] #(index of number)
 #No assign yet.
 
-incorporate{H}(h::H, x::Number) = incorporate(h, x,1)
 incorporate{IArr}(h::Histogram{IArr}, x::Number, step::Integer) = #!
-   (h.f <= x <= h.t) ?  h.field[x] += step : nothing #Hell, yeah.
+   (h.f <= x <= h.t) ?  incorporate(h.field, x,step) : nothing #Hell, yeah.
 
-#Iterating it. TODO make continuous iter work on it?
+#Iterating it.
 start{IArr}(h::Histogram{IArr}) = start(h.field)
 done{IArr,State}(h::Histogram{IArr},s::State) = done(h.field,s)
 next{IArr,State}(h::Histogram{IArr},s::State) = next(h.field,s)

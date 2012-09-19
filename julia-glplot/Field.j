@@ -36,10 +36,17 @@ i_at{N<:Number,IArr}(f::Field{IArr}, x::N) = int((x-f.s)/f.d)
 x_at{I<:Integer,IArr} (f::Field{IArr}, i::I) = f.s + f.d*i
 pos_at{I<:Integer,IArr} (f::Field{IArr}, i::I) = (f.s + f.d*i, f.arr[i])
 
-#Iterating it. TODO make continuous iter work on it?
+#Iterating it. 
 start{IArr}(f::Field{IArr}) = start(f.arr)
 done{IArr,State}(f::Field{IArr},s::State) = done(f.arr,s)
 function next{IArr,State}(f::Field{IArr},s::State)
   (i,v),next_state = next(f.arr,s)
   return ((f.s + f.d*i, v), next_state) #Make it position, state.
+end
+
+function dlmwrite_any{IArr}(to::IOStream, f::Field{IArr}, 
+                            delim::String,line_delim::String)
+  write(to, "# s $(f.s) d $(f.d)\n")
+  write(to, "# si $(min_i(f.arr))\n")
+  dlmwrite_any(to, f.arr,delim,line_delim)
 end

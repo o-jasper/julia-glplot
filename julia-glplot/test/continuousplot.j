@@ -13,8 +13,12 @@ load("sdl_bad_utils/sdl_event.j")
 #load("util/util.j")
 load("util/geom.j")
 
-load("julia-glplot/histogram.j")
-load("julia-glplot/iter_histogram.j")
+load("util/ExpandingArray.j")
+load("julia-glplot/Field.j")
+
+load("julia-glplot/Histogram.j")
+load("julia-glplot/HistogramLog.j")
+load("julia-glplot/HistogramLinArea.j")
 
 load("julia-glplot/iter_able.j")
 load("julia-glplot/gl_plot.j")
