@@ -29,6 +29,8 @@ function ref{T,I<:Integer}(a::ExpandingArray{T}, i::I)
   return (j < 1 || j>length(a.arr)) ? zero(T) : a.arr[j]
 end
 
+el_cnt{T}(arr::ExpandingArray{T}) = length(arr.arr)
+
 function assign{T,I<:Integer}(a::ExpandingArray{T}, to::T, i::I, 
                               overshoot::Float64)
   len = length(a.arr)
@@ -84,6 +86,14 @@ end
 ExpandingArray2d(T::Type) =
     ExpandingArray2d(ExpandingArray(ExpandingArray{T}))
 zero{T}(arr2d::ExpandingArray2d{T}) = ExpandingArray2d(T)
+#Total number of elements.
+function el_cnt{T}(arr::ExpandingArray2d{T})
+  sum = 0
+  for el in indexless_iter(arr.arr)
+    sum += el_cnt(el)
+  end
+  return sum
+end
 
 #Iterating it. (TODO better way of passing the features of a member..?)
 start{T}(arr::ExpandingArray2d{T}) = start(arr.arr)

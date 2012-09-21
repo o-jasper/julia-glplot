@@ -4,14 +4,10 @@
 #Depreciated. TODO remove.
 isnothing(thing) = isequal(thing,nothing)
 
-#TODO a macro, just `with` that uses `end_with` at the end.
-# `@with stream = open(..) begin .. end` would use:
-#end_with(io::IOStream) = close(io)
-
 #Do stuff with a file open, closing it afterward `file` and `mode` correspond
-# to arguments of `open`
+# to arguments of `open` #NOTE depreciated, use @with open() ... instead.
 macro with_open_file(stream_var,file, mode, body)
-  ret = gensym()
+  ret= gensym()
   quote $stream_var = open($file,$mode)
     $ret = $body
     close($stream_var)
