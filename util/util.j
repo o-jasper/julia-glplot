@@ -1,19 +1,31 @@
-#  Jasper den Ouden 02-08-2012
+#  Jasper den Ouden 24-09-2012
 # Placed in public domain.
 
 #Depreciated. TODO remove.
 isnothing(thing) = isequal(thing,nothing)
 
-#Do stuff with a file open, closing it afterward `file` and `mode` correspond
-# to arguments of `open` #NOTE depreciated, use @with open() ... instead.
-macro with_open_file(stream_var,file, mode, body)
+#Make and set a (local) variable and clean up transparently other.
+# Abstraction leak: doesn't clean up if returning in middle.(Need unwind-protect)
+macro with(setting, body)
+  w_var = isa(setting,Expr) && is(setting.head,symbol("="))
+ #Make a variable if none given.
+  setting = w_var ? setting : :($(gensym()) = $setting) 
+  assert(length(setting.args)==2, "Cannot set more than one thing at a time.
+ (incorrect number of arguments in Expr of setting; $(length(setting.args)))")
   ret= gensym()
-  quote $stream_var = open($file,$mode)
-    $ret = $body
-    close($stream_var)
-    return $ret
-  end
+  return esc(quote 
+              local $setting
+              $ret = $body
+              no_longer_with($(setting.args[1]), $ret)
+             end)
 end
+#If ret not input argument, defaults to return it.
+function no_longer_with{T,With}(with::With, ret::T) 
+  no_longer_with(with)
+  return ret
+end
+
+no_longer_with(stream::IOStream) = close(stream) #!
 
 #Find an index that `is` the same.(TODO doesn't already exist?)
 function find_index{T}(arr::Array{T,1},find::T)

@@ -30,7 +30,7 @@ make_tabbed_file{T}(stream::T, max_depth::Integer, len::Integer,
 function make_tabbed_file(file::String,
                           max_depth::Integer, len::Integer,
                           deepen_prob::Number, tab::String,tabstr::String)
-  @with_open_file stream file "w" begin
+  @with stream=open(file,"w") begin
     make_tabbed_file(stream,max_depth,len,deepen_prob, tab,tabstr)
   end
 end

@@ -62,7 +62,7 @@ function dlmwrite_any{IArr2d}(to::IOStream, f::Field2d{IArr2d},
 end
 
 dlmwrite_any{IArr2d}(file::String, f::Field2d{IArr2d}) = 
-    @with_open_file stream file "w" dlmwrite_any(stream, f, "\t","\n")
+    @with stream = open(file,"w") dlmwrite_any(stream, f, "\t","\n")
 
 #Write it as a list of points.
 function dlmwrite_pointlist{IArr2d}(to::IOStream, f::Field2d{IArr2d}, 
@@ -80,8 +80,8 @@ end
 dlmwrite_pointlist{IArr2d}(file::String, f::Field2d{IArr2d}, 
                            between_delim::String, delim::String,
                            line_delim::String) =
-    @with_open_file stream file "w" dlmwrite_pointlist(stream,f,between_delim,
-                                                       delim, line_delim)
+    @with stream = open(file,"w") dlmwrite_pointlist(stream,f,between_delim,
+                                                     delim, line_delim)
 
 dlmwrite_pointlist{IArr2d,To}(to::To, f::Field2d{IArr2d}) =
     dlmwrite_pointlist(to, f, "\t","\n","\n\n")

@@ -61,7 +61,7 @@ function run_test()
       next_print_t += 1
     end
   #Drawing stuff.
-    @with_pushed_matrix begin
+    @with glpushed() begin
       unit_frame()
       unit_frame_to(0.1,0.1, 0.9,0.9)
       glcolor(1,1,1)

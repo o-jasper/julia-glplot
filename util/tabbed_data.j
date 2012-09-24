@@ -24,6 +24,6 @@ read_tabbed_data{T}(stream::T) =
     read_tabbed_data(stream,tabbed_data_default_tab)
 
 read_tabbed_file(file::String, tab::String) =
-    @with_open_file s file "r" read_tabbed_data(s, tab)
+    @with s=open(file,"r") read_tabbed_data(s, tab)
 read_tabbed_file(file::String) = 
     read_tabbed_file(file,tabbed_data_default_tab)

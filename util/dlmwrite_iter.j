@@ -17,8 +17,8 @@ end
 
 dlmwrite_iter{Iterable}(to::String, iterable::Iterable, 
                         delim::String,line_delim::String) =
-    @with_open_file stream to "w" dlmwrite_iter(stream,iterable,
-                                                delim,line_delim)
+    @with stream = open(to,"w") dlmwrite_iter(stream,iterable,
+                                              delim,line_delim)
 #With default string.
 dlmwrite_iter{To,Iterable}(to::To,iterable::Iterable, delim::String) =
     dlmwrite_iter(to,iterable, delim,"\n")

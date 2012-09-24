@@ -12,7 +12,7 @@ function gl_plot_under{T}(mode::Integer, thing::T,
                           to::Number, rectangular::Bool)
   thing = inform_of_range(thing, range)
   fx,fy,tx,ty = range #TODO keep in range on y dir.
-  @with_pushed_matrix begin
+  @with glpushed() begin
     unit_frame_from(range)
     if mode==GL_QUAD_STRIP && !rectangular
       glbegin(mode)
@@ -94,7 +94,7 @@ function gl_plot{T}(mode::Integer,thing::T,
     return #TODO this should be some problem.
   end
   inside(x,y) = (x>=fx && y>=fy && x<=tx && y<=ty)
-  @with_pushed_matrix begin
+  @with glpushed() begin
     unit_frame_from(range) #_Manually_ using the iterator.
     (px,py),iter_state = next(thing,start(thing)) 
     inside_p::Bool = inside(px,py)
@@ -153,9 +153,9 @@ function gl_plot_bar_intensity{T}(thing::T,
   thing = inform_of_range(thing, range)
   fx,fy, tx,ty = range
   cur_color(y) = interpolate_color(y, fy,ty, colors)
-  @with_pushed_matrix begin
+  @with glpushed() begin
     unit_frame_from(fx,0, tx,1)
-    @with_primitive GL_QUAD_STRIP for el in thing
+    @with glprimitive(GL_QUAD_STRIP) for el in thing
       x,y = el
       glcolor(cur_color(y))
       glvertex(x,0) #TODO more vertices if 'hard edge' desired.

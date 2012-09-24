@@ -35,28 +35,28 @@ function run_this()
     incorporate(h, randexp())
   end
   while true
-    @with_pushed_matrix begin
+    @with glpushed() begin
       unit_frame()
       unit_frame_to(0.1,0.1, 0.9,0.9)
       glcolor(0.3,0.3,0.3)
       function sqr(x)
         return x^2
       end
-      @with_pushed_matrix gl_plot_under(PlotPath(sqr, -1,1), (-1,0,+1,+1))
+      @with glpushed() gl_plot_under(PlotPath(sqr, -1,1), (-1,0,+1,+1))
       glcolor(1,0,0)
-      @with_pushed_matrix gl_plot(PlotPath(sqr), (-1,0,+1,+1))
+      @with glpushed() gl_plot(PlotPath(sqr), (-1,0,+1,+1))
       
       function circle(a)
         return (cos(6.28*a),sin(6.28*a))
       end
-      @with_pushed_matrix gl_plot(PlotPath(circle,0,1), (-1,-1,+1,+1))
+      @with glpushed() gl_plot(PlotPath(circle,0,1), (-1,-1,+1,+1))
       
       glcolor(1,1,1)
       #println(plot_range_of(h))
-      @with_pushed_matrix gl_plot(h)#, (0,0, 10,max(h)))
+      @with glpushed() gl_plot(h)#, (0,0, 10,max(h)))
     end
     
-    @with_primitive GL_TRIANGLES begin
+    @with glprimitive(GL_TRIANGLES) begin
       glcolor(1.0,0.0,0.0)
       glvertex(mx(),my())
       glvertex(mx()+0.1,my())

@@ -167,7 +167,7 @@ function gl_plot(cpsh::FancyContinuousPlot)
   hist = cpsh.h.lin_area
   glcolor(0.2,0.2,0.2) #TODO allow user to determine the colors
                        # (..linewidth, etc) throughout
-  @with_pushed_matrix begin #And the histogram rotated 90 degrees.
+  @with glpushed() begin #And the histogram rotated 90 degrees.
     glrotate(90)
     gltranslate(0,-1)
     gl_plot_filled_box(hist)
@@ -183,7 +183,7 @@ end
 #Continuous plot with histogram and time-distribution histogram.
 function gl_plot_time_dist(cpsh::FancyContinuousPlot, h::Number)
   const dot_size = 0.005
-  @with_pushed_matrix begin #Time difference distribution plot.
+  @with glpushed() begin #Time difference distribution plot.
     if h>0
       unit_frame_to(1,0,0,h)
     else
@@ -191,7 +191,7 @@ function gl_plot_time_dist(cpsh::FancyContinuousPlot, h::Number)
     end
     glcolor(0,1,0)
     range = plot_range_of(cpsh.arrival.lin_area)
-    @with_primitive GL_LINES begin
+    @with glprimitive(GL_LINES) begin
       glvertex(0,0) 
       glvertex(0,1)
       glvertex(1,0)
@@ -200,7 +200,7 @@ function gl_plot_time_dist(cpsh::FancyContinuousPlot, h::Number)
     glcolor(0.5,0.5,0.5) 
     gl_plot_filled_box(cpsh.arrival.lin_area)
     glcolor(1,1,0)
-    @with_primitive GL_QUADS begin
+    @with glprimitive(GL_QUADS) begin
       fx,meh = map_to_range(cpsh.last_delta, 0, range)
       fy = 1.5*dot_size/abs(h) - dot_size
       rect_vertices(fx,fy, fx+2*dot_size,fy+2*dot_size/abs(h))
@@ -209,7 +209,7 @@ function gl_plot_time_dist(cpsh::FancyContinuousPlot, h::Number)
   unit_frame_to(0,max(h,0), 1,min(1,1+h))
 end
 
-#  @with_pushed_matrix begin #Draw regular plot.
+#  @with glpushed() begin #Draw regular plot.
 #    unit_frame_to(0,max(h,0), 1,min(1,1+h))
 #    gl_plot(cpsh)
 #    if !isempty(cpsh.cp.data)
@@ -218,7 +218,7 @@ end
 #      fy,ty = (hist.s, hist.s + hist.d*length(hist))
 #      rx,ry = map_to_range(x,y, plot_range_of(cpsh.cp, fy,ty, time()))
 #      glcolor(1,1,0)
-#      @with_primitive GL_QUADS begin
+#      @with glprimitive(GL_QUADS) begin
 #        vertices_rect_around(clamp(rx,0,1),clamp(ry,0,1), dot_size)
 #      end
 #    end
@@ -227,7 +227,7 @@ end
 #Continuous plot with a little space(potentially) for an intensity plot.
 function gl_plot_pre_intensity(cpsh::FancyContinuousPlot, w::Number, 
                                colors::Vector)
-  @with_pushed_matrix begin
+  @with glpushed() begin
     unit_frame_to(1-w,0, 1,1)
     glrotate(90)
     gltranslate(0,-1)
@@ -238,7 +238,7 @@ end
 #Note that the data in there increases logithmically.
 #TODO better version.
 function gl_plot_pwr(cpsh::FancyContinuousPlot, w::Number)
-  @with_pushed_matrix begin
+  @with glpushed() begin
     unit_frame_to(w,0,0,1) #Inverted on x axis!
     hist = cpsh.h.lin_area #TODO this range should be available by function?
     (fy,ty) = (hist.s, hist.s + hist.d*length(hist))
@@ -249,7 +249,7 @@ end
 
 
 function gl_plot(cpsh::FancyContinuousPlot, time_distribution_h::Number)
-  @with_pushed_matrix begin
+  @with glpushed() begin
     gl_plot_time_dist(cpsh, time_distribution_h)
     gl_plot(cpsh)
   end
@@ -257,7 +257,7 @@ end
 
 function gl_plot(cpsh::FancyContinuousPlot, time_distribution_h::Number,
                  intensity_w::Number, colors::Vector)
-  @with_pushed_matrix begin
+  @with glpushed() begin
     gl_plot_time_dist(cpsh, time_distribution_h)
     gl_plot_pre_intensity(cpsh, intensity_w, colors)
     gl_plot(cpsh)
@@ -266,7 +266,7 @@ end
 
 function gl_plot(cpsh::FancyContinuousPlot, time_distribution_h::Number,
                  intensity_w::Number, colors::Vector, pwr_w::Number)
-  @with_pushed_matrix begin
+  @with glpushed() begin
     gl_plot_time_dist(cpsh, time_distribution_h)
     gl_plot_pwr(cpsh, pwr_w) #Below compensates for pwr_w.
     gl_plot_pre_intensity(cpsh, intensity_w/(1-pwr_w), colors) 
