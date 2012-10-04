@@ -1,7 +1,7 @@
 
 echo testing $1
 
-julia $1.j > result/$1
+julia -L ~/.juliarc.jl $1.j > result/$1
 
 cd result 
 
