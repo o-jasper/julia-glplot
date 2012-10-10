@@ -1,17 +1,14 @@
 
-load("load_so.j")
-load("get_c.j")
-
+load("util/load_so.j")
+load("util/get_c.j")
 load("util/util.j")
+load("util/geom.j")
 
 load("autoffi/gl.j")
-load("gl_util.j")
+load("ffi_extra/gl.j")
 
-load("sdl_bad_utils/init_stuff.j")
-load("sdl_bad_utils/sdl_event.j")
+load("sdl_bad_utils/sdl_bad_utils.j")
 
-#load("util/util.j")
-load("util/geom.j")
 
 load("util/ExpandingArray.j")
 load("julia-glplot/Field.j")
