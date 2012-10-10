@@ -17,14 +17,15 @@ Contains
 It is a bit early in development.
 
 ## Depends on
-TODO update.
-
-The GL stuff in [parse-c-header](https://github.com/o-jasper/parse-c-header)/[julia-src](https://github.com/o-jasper/parse-c-header/tree/master/julia-src).
+The GL stuff in [julia-ffi](https://github.com/o-jasper/julia-ffi).
 
 ## Usage
-To use, edit `~/.juliarc.jl` and add.
+To use, edit `~/.juliarc.jl` if that directory is not already added and 
 
-    push(LOAD_PATH, "$(path_to_julia-glplot)) #(Only says julia-glplot once in filename.)
+    push(LOAD_PATH, "$(path_directory_where_project_directory_is))
+    
+Currently you have to run it as `julia -L ~/.juliarc.jl` 
+**TODO** is use the modules, and figure how to load things correctly..
 
 If you didn't forget to run `make` in parse-c-header, things can be loaded
 with paths originating from that. There is an example in 
@@ -32,9 +33,6 @@ with paths originating from that. There is an example in
 (it includes things needed by parse-c-header) The testing files can then be 
 run with `julia test/somefile.j` (If all well, not mattering from which
 directory)
-
-Currently you have to run it as `julia -L ~/.juliarc.jl` 
-TODO use the modules..
 
 ### Tests
 Can be run with `make test_all` and other entries in the makefiles. They 
@@ -55,6 +53,9 @@ lines aught to indicate no errors.
 
 * Real time plotter 'averages over different lengths of time' plot and
   corresponding '2d' histogram. What is currently there is a bit too limited.
+  + Also bar plots along length.
+  
+* Waterfall plot. (possibly change real time plotter to do it)
 
 * better docs, examples.(Well the tests are examples.)
   Example with arduino output.
