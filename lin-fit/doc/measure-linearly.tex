@@ -1,0 +1,64 @@
+\documentclass{article}
+
+\author{Jasper den Ouden}
+
+\newcommand{\half}{\frac{1}{2}}
+
+\begin{document}
+
+\section*{Most likelyhood on linear additions}
+The method of most likelyhood assumes gaussian errors, this leads to a
+ method of least squares by taking the logarithm:
+$$\chi^2 \equiv log(\mathrm{Probability})= 
+  log(\prod_kexp((y(x_k)-y_k)^2/2\sigma^2_k)=
+  \half\sum_k\sigma_k^{-2}(y(x_k)-y_k)^2$$
+Where $k$ is a number for the independent measurements.
+
+For the model of linear additions:
+$$y(x)= \sum_i a_if_i(x)$$
+We have:
+$$\chi^2=\half\sum_k\sigma_k^{-2}(\sum_{i}a_if_i(x_k)-y_k)^2$$
+leading to linear equations when minimizing:
+$$\partial_{a_j}\chi^2= \sum_k\sigma_k^{-2}(y(x_k)-y_k)\cdot f_j(x_k)=0
+\sum_k\sigma_k^{-2}(\sum_ia_if_i(x_k)-y_k)\cdot f_j(x_k)=0
+ \Rightarrow$$
+$$\sum_i a_i \sum_k\sigma_k^{-2}f_i(x_k)\cdot f_j(x_k)=
+   \sum_{ik}\sigma_k^{-2}y_k\cdot f_j(x_k)$$
+
+Now note that each of the sums here can be added together at any point. We 
+dont need to store a list of stuff and then add those together.
+
+\subsection*{Subsets of this}
+Clearly stuff like $y=Ax+b = \sum A_i\cdot x_i + b$ is a subset, with
+$f_i(x)=x_i$ and $f_{N+1}(x)=1$. Of course $y=Mx$ is also  subset.
+
+\subsection*{Fitting $y=\sum_ia_if_i(x)$ using fitting $y=Mx$}
+Conversely, we can use $y=Mx$ to fit $y=\sum_ia_if_i(x)$, by 
+$x_i\rightarrow f_i(x)$ (different x on sides arrow) Note that the errors are
+those on $y$ so those aren't 'translated'. All that is really happening here 
+is that we're providing the functions already calculated here, though.
+
+\section*{Useful for}
+Many problems can be linearized in approximations. And linear problems
+as $L\Phi=s$, with $L$ a linear operator has Green functions, so that
+$LG=\delta$ and then
+ $L\int G(y-x)s(y) dy = \int \delta(y-x) s(y) dy= s(x)$ so 
+$\Phi=\int G(y-x)s(y)dy$ is a solution. This can also be divided into volumes
+$V_i$ so that for $i/ne j$, $V_i\cap V_j= \phi$ total volume $V=\cap_iV_i$,
+then $\Phi= \int_V G(y-x)s(y)dy = \sum_i \int_{V_i}G(y-x)s(y)dy$ which can
+help making assumptions about the source.
+
+Of course you probably have already done it. If you have added forces from 
+different sources of gravity, electrostatic forces etcetera. Adding the 
+gravity of a sphere is basically using a $V_i=\mathrm{That sphere}$ and 
+assuming the source everywhere else zero.
+\footnote{Maybe this is No 1. of the overcomplicatedly teached very simple 
+things.}
+
+\subsection*{Linear electrical circuits}
+The first thing to treat is electrical circuits, where the source is a 
+'magical' current input.\footnote{'Heat conduction circuits' are analogous, 
+but just don't have inductance.} Essentially, it comes down to the same as the
+previous.
+
+\end{document}

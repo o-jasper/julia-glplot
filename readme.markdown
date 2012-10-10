@@ -5,16 +5,20 @@ Contains
 * Plotting of arrays, functions(anything with a `pos(thing,index)` and
   `done(thing,index)`(`gl_plot` plots them)
 
-* Histograms
+* Histograms(and plotting them), including ones that expand as needed.
+  They simply use the expanding array in the utilities included in julia-ffi.
+  They use  [parameteric types](http://docs.julialang.org/en/latest/manual/types/#man-parametric-types) so the expanding arrays can easily be switched 
+  out with other implementations of expanding arrays.
 
 * Real time plotter ('oscilloscope style') that (optionally)histograms the
   input and the times between to receivals of time.
+  (add all sorts of fancy stuff, why not is the idea.)
 
 It is a bit early in development.
 
-Also contains some utilities i use in `util/`
-
 ## Depends on
+TODO update.
+
 The GL stuff in [parse-c-header](https://github.com/o-jasper/parse-c-header)/[julia-src](https://github.com/o-jasper/parse-c-header/tree/master/julia-src).
 
 ## Usage
@@ -29,40 +33,39 @@ with paths originating from that. There is an example in
 run with `julia test/somefile.j` (If all well, not mattering from which
 directory)
 
+Currently you have to run it as `julia -L ~/.juliarc.jl` 
+TODO use the modules..
+
 ### Tests
 Can be run with `make test_all` and other entries in the makefiles. They 
 output into like `test/result/run_list`
 
     $USER `git status|wc -l` `git log|head -n 1` time `date +%s` ... number of lines in stdout`
 	
-Inperfect as it is, it gives an indication how well things work. Stdout is 
-outputted into `test/result` files aswel, zero lines aught to indicate no 
-errors.
+Inperfect as it is(bit quickly botched together), it gives an indication how 
+well things work. Stdout is outputted into `test/result` files aswel, zero 
+lines aught to indicate no errors.
 
 ## (maybe)TODO
 
-* `plot_able.j` makes things plottable, by adding `done(thing,index)`, 
-  and `pos(thing,index)`, much nicer to use the regular iterable stuff.
+* Fix out-of-dateness.
 
 * How stuff is loaded/run not standard? How do i get this to be according to
   'the best convention' out there?
 
-* expanding', histograms and the logarithmic use thereof
-  (prevents prohibitive array sizes which still incorporating *everything*)
-  code is there but poorly tested, not sure if it works.
-
 * Real time plotter 'averages over different lengths of time' plot and
-  corresponding '2d' histogram.(actually a line of histograms for each)
+  corresponding '2d' histogram. What is currently there is a bit too limited.
 
 * better docs, examples.(Well the tests are examples.)
-
-* Can help getting data in?
+  Example with arduino output.
 
 * plotting of 2d arrays and histograms. 
 
 * 3d plots.
 
 * other outputs? (cairo?)
+
+* Get the linear fitting code to work.
 
 ## Copyright
 Everything is under GPLv3, license included under `doc/`

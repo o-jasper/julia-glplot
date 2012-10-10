@@ -1,0 +1,20 @@
+type error: incorporate!: in apply, expected Function, got Int64
+ in incorporate! at /home/jasper/proj/julia/julia-glplot/lin-fit/lin-fit.j:20
+ in incorporate! at /home/jasper/proj/julia/julia-glplot/lin-fit/resistor-scan.j:21
+ in random_test at /home/jasper/proj/julia/julia-glplot/lin-fit/test/resistor-scan-test.j:44
+ in random_test at /home/jasper/proj/julia/julia-glplot/lin-fit/test/resistor-scan-test.j:55
+ in load_now at util.jl:231
+ in load_now at util.jl:245
+ in require at util.jl:174
+ in process_options at client.jl:178
+ in _start at client.jl:232
+at /home/jasper/proj/julia/julia-glplot/lin-fit/test/resistor-scan-test.j:57
+ in load_now at util.jl:231
+ in load_now at util.jl:245
+ in require at util.jl:174
+ in process_options at client.jl:178
+ in _start at client.jl:232
+ in load_now at util.jl:256
+ in require at util.jl:174
+ in process_options at client.jl:178
+ in _start at client.jl:232
