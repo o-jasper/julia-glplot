@@ -1,10 +1,8 @@
 
 all:
 	echo Currently nothing to be made.\(and don\'t expect anything\); \
-	echo There is a test, however.
-
-test: test_glplot
+	echo There is a test_glplot, however.
 
 test_glplot:
-	cd julia-glplot/test/;\
-	make test
+	cd test/;\
+	make test_stuff
