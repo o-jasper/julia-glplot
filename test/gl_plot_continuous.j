@@ -1,31 +1,30 @@
 
-load("util/load_so.j")
-load("util/get_c.j")
 load("util/util.j")
+load("util/get_c.j")
 load("util/geom.j")
+
+load("util/ExpandingArray.j")
+load("util/dlmwrite_iter.j")
 
 load("autoffi/gl.j")
 load("ffi_extra/gl.j")
 
 load("sdl_bad_utils/sdl_bad_utils.j")
 
+load("julia-glplot/glplot-objects.j")
+load("julia-glplot/glplot.j")
 
-load("util/ExpandingArray.j")
-load("julia-glplot/Field.j")
+import OJasper_Util.*
+import ExpandingArrayModule.*
+import ExpandingArrayModule.*
+import DlmWriteIter.*
 
-load("julia-glplot/Histogram.j")
-load("julia-glplot/HistogramLog.j")
-load("julia-glplot/HistogramLinArea.j")
+import SDL_BadUtils.*
+import AutoFFI_GL.*
+import FFI_Extra_GL.*
 
-load("julia-glplot/iter_able.j")
-load("julia-glplot/gl_plot.j")
-load("julia-glplot/gl_plot_histogram.j")
-
-load("julia-glplot/util_fun.j")
-load("julia-glplot/plot_pwr.j")
-load("julia-glplot/gl_plot_pwr.j")
-
-load("julia-glplot/gl_plot_continuous.j")
+import JuliaGLPlotObjects.*
+import JuliaGLPlot.*
 
 screen_width = 640
 screen_height = 640
@@ -62,7 +61,7 @@ function run_test()
       unit_frame()
       unit_frame_to(0.1,0.1, 0.9,0.9)
       glcolor(1,1,1)
-      gl_plot(cpsh, 0.2,0.02, grayscale_color)
+      gl_plot(cpsh, 0.2,0.02, plot_grayscale_color)
 #      gl_plot_bar_intensity(cpsh.h.lin_area, 0.1,grayscale_color)
     end
     finalize_draw()

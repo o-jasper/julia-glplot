@@ -1,0 +1,19 @@
+Cannot find julia-glplot/iter_able.j
+ in real_path at file.jl:158
+ in find_in_path at util.jl:202
+ in require at util.jl:172
+ in load_now at util.jl:231
+ in load_now at util.jl:245
+ in require at util.jl:174
+ in process_options at client.jl:178
+ in _start at client.jl:232
+at /home/jasper/proj/julia/julia-glplot/test/plot_n_hist.j:32
+ in load_now at util.jl:231
+ in load_now at util.jl:245
+ in require at util.jl:174
+ in process_options at client.jl:178
+ in _start at client.jl:232
+ in load_now at util.jl:256
+ in require at util.jl:174
+ in process_options at client.jl:178
+ in _start at client.jl:232

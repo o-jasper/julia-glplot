@@ -7,6 +7,8 @@
 # (at your option) any later version.
 #
 
+#NOTE: probably this whole thing will get deleted!
+
 #Averages together averages over powers of time.
 type PlotPwr
   base::Uint8

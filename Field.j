@@ -24,7 +24,9 @@ length{IArr}(f::Field{IArr}) = length(f.arr)
 max{IArr}(f::Field{IArr})  = max(f.arr) #Only for <:Number
 min{IArr}(f::Field{IArr})  = min(f.arr)
 
-ref{N<:Number,IArr}(f::Field{IArr}, x::N) = f.arr[int((x-f.s)/f.d)]
+ref_i{I<:Integer,IArr}(f::Field{IArr}, i::I) = f.arr[i]
+
+ref{N<:Number,IArr}(f::Field{IArr}, x::N) = ref_i(f, int((x-f.s)/f.d))
 assign{T,N<:Number,IArr}(f::Field{IArr}, to::T, x::N) = #!
     (f.arr[int((x-f.s)/f.d)] = to) 
 

@@ -236,7 +236,6 @@ function gl_plot_pre_intensity(cpsh::FancyContinuousPlot, w::Number,
   unit_frame_to(0,0, 1-w,1)
 end
 #Note that the data in there increases logithmically.
-#TODO better version.
 function gl_plot_pwr(cpsh::FancyContinuousPlot, w::Number)
   @with glpushed() begin
     unit_frame_to(w,0,0,1) #Inverted on x axis!

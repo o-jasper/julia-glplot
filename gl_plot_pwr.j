@@ -20,4 +20,3 @@ gl_plot(p::PlotPwr) =
 
 #TODO bar intensity plot in plot_gl and then multiple of those
 # for PlotPwrHist{H}
-

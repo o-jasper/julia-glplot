@@ -1,22 +1,30 @@
 
-load("util/load_so.j")
-load("util/get_c.j")
 load("util/util.j")
+load("util/get_c.j")
+load("util/geom.j")
+
+load("util/ExpandingArray.j")
+load("util/dlmwrite_iter.j")
 
 load("autoffi/gl.j")
 load("ffi_extra/gl.j")
 
 load("sdl_bad_utils/sdl_bad_utils.j")
 
-load("util/ExpandingArray.j")
-load("julia-glplot/Field.j")
+load("julia-glplot/glplot-objects.j")
+load("julia-glplot/glplot.j")
 
-load("julia-glplot/Histogram.j")
-#load("julia-glplot/iter_histogram.j")
+import OJasper_Util.*
+import ExpandingArrayModule.*
+import ExpandingArrayModule.*
+import DlmWriteIter.*
 
-load("julia-glplot/iter_able.j")
-load("julia-glplot/gl_plot.j")
-load("julia-glplot/gl_plot_histogram.j")
+import SDL_BadUtils.*
+import AutoFFI_GL.*
+import FFI_Extra_GL.*
+
+import JuliaGLPlotObjects.*
+import JuliaGLPlot.*
 
 function run_this()
   screen_width = 640
@@ -32,6 +40,7 @@ function run_this()
   for n = 1:2000
     incorporate(h, randexp())
   end
+ 
   while true
     @with glpushed() begin
       unit_frame()
@@ -44,13 +53,12 @@ function run_this()
       glcolor(1,0,0)
       @with glpushed() gl_plot(PlotPath(sqr), (-1,0,+1,+1))
       
-      function circle(a)
-        return (cos(6.28*a),sin(6.28*a))
-      end
-      @with glpushed() gl_plot(PlotPath(circle,0,1), (-1,-1,+1,+1))
+      @with glpushed() gl_plot(PlotPath( a->(cos(a),sin(a)), 0,2*pi),
+                               (-1,-1,+1,+1))
       
+      glcolor(0,0,1)
+      @with glpushed() gl_plot_filled_box(h)#, (0,0, 10,max(h)))
       glcolor(1,1,1)
-      #println(plot_range_of(h))
       @with glpushed() gl_plot(h)#, (0,0, 10,max(h)))
     end
     
