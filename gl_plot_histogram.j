@@ -10,16 +10,10 @@
 #NOTE gl_plot_filled_box(Histogram,(NNNN),Number) works by a generic function
 # in plot_gl.j!
 
-gl_plot{IArr}(h::Histogram{IArr},
-              range::(Number,Number,Number,Number), box_to::Number) =
-    gl_plot_box(h, range, box_to)
-gl_plot{IArr}(h::Histogram{IArr}, range::(Number,Number,Number,Number)) = 
-    gl_plot(h,range, range[2])
-
-gl_plot{IArr}(h::Histogram{IArr}, box_to::Number) = 
-    gl_plot(h,plot_range_of(h), box_to)
-gl_plot{IArr}(h::Histogram{IArr}) =
-    gl_plot(h,plot_range_of(h), min(h))
+function gl_plot{IArr}(h::Histogram{IArr}, opts::Options)
+    @default opts to = 0
+    gl_plot_box(h, opts)
+end
 
 #Generic guys to fit on all the histograms.(and more?)
 

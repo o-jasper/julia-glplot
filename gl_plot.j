@@ -7,9 +7,11 @@
 # (at your option) any later version.
 #
 
-function gl_plot_under{T}(mode::Integer, thing::T, 
-                          range::(Number,Number,Number,Number),
-                          to::Number, rectangular::Bool)
+function gl_plot_under{T}(mode::Integer, thing::T, opts::Options)
+  @defaults range = plot_range_of(thing)
+  @defaults to = range[2]
+  @defaults rectangular = false
+  
   thing = inform_of_range(thing, range)
   fx,fy,tx,ty = range #TODO keep in range on y dir.
   @with glpushed() begin
@@ -49,24 +51,21 @@ function gl_plot_under{T}(mode::Integer, thing::T,
     end
   end
 end
-#Variants..(too long..)
-gl_plot_under{T}(thing::T, range::(Number,Number,Number,Number), to::Number) =
-    gl_plot_under(GL_QUAD_STRIP, thing, range, to, false)
-gl_plot_under{T}(thing::T, range::(Number,Number,Number,Number)) =
-    gl_plot_under(GL_QUAD_STRIP, thing, range, range[2], false)
-gl_plot_above{T}(thing::T, range::(Number,Number,Number,Number)) =
-    gl_plot_under(GL_QUAD_STRIP, thing, range, range[4], false)
+gl_plot_under{T}(thing::T) = gl_plot_under(thing, @options)
 
-gl_plot_filled_box{T}(thing::T, range::(Number,Number,Number,Number), 
-                      to::Number) =
-    gl_plot_under(GL_QUADS, thing, range, to, true)
-gl_plot_filled_box{T}(thing::T, range::(Number,Number,Number,Number)) =
-    gl_plot_filled_box(thing, range, 0, true)
+function gl_plot_above{T}(thing::T, opts::Options)
+    @set_options opts to = range[4]
+    gl_plot_under(thing, opts)
+end
+gl_plot_above{T}(thing::T) = gl_plot_above(thing,@options)
 
-gl_plot_box{T}(thing::T, range::(Number,Number,Number,Number), to::Number) =
-    gl_plot_under(GL_LINE_LOOP, thing, range, to, true)
-gl_plot_box{T}(thing::T, range::(Number,Number,Number,Number)) =
-    gl_plot_box(thing, range, 0, true)
+gl_plot_filled_box{T}(thing::T, opts::Options) =
+    gl_plot_under(GL_QUADS, thing, opts)
+gl_plot_filled_box{T}(thing::T) = gl_plot_filled_box(thing,@options)
+
+gl_plot_box{T}(thing::T, opts::Options) =
+    gl_plot_under(GL_LINE_LOOP, thing, opts)
+gl_plot_box{T}(thing::T) = gl_plot_box(thing,@options)
 
 #TODO pretty sure it is wrong.
 #Returns the x where the line hits y=0 
@@ -86,8 +85,8 @@ end
 
 exit_pos(sx,sy,ex,ey, range) = exit_pos(sx,sy,ex,ey, range, 1e-9)
 
-function gl_plot{T}(mode::Integer,thing::T, 
-                    range::(Number,Number,Number,Number))
+function gl_plot{T}(mode::Integer,thing::T, opts::Options)
+  @defaults opts range = plot_range_of(thing)
   thing = inform_of_range(thing, range)
   fx,fy,tx,ty = range
   if fx==tx || fy==ty
@@ -126,10 +125,13 @@ function gl_plot{T}(mode::Integer,thing::T,
     end
   end
 end
-#You can pick other things, of course, like GL_TRIANGLE_STRIP if you think 
-# it is convex.(TODO.. where? false comment?)
-gl_plot{T}(thing::T, range::(Number,Number,Number,Number)) =
-    gl_plot(GL_LINE_STRIP, thing::T, range)
+
+gl_plot{T}(mode::Integer, thing::T)
+    gl_plot(mode, thing::T, @options)
+gl_plot{T}(thing::T, opts::Options)
+    gl_plot(GL_LINE_STRIP, thing::T, opts)
+gl_plot{T}(thing::T) =
+    gl_plot(GL_LINE_STRIP, thing)
 
 function interpolate_color(x, f,t, colors)
   d = (t-f)/(length(colors)+1)
@@ -146,10 +148,14 @@ function interpolate_color(x, f,t, colors)
   end
 end
 
+#TODO more color themes?
+const plot_grayscale_color = [(0,0,0), (1,1,1)]
+
 #'bar intensity plot'.
-function gl_plot_bar_intensity{T}(thing::T,
-     range::(Number,Number,Number,Number),
-     colors::Array{(Number,Number,Number), 1}, h::Number)
+function gl_plot_bar_intensity{T}(thing::T, opts::Options)
+  @defaults range = plot_range_of(thing)
+  @defaults colors = plot_grayscale_color
+
   thing = inform_of_range(thing, range)
   fx,fy, tx,ty = range
   cur_color(y) = interpolate_color(y, fy,ty, colors)
@@ -163,14 +169,5 @@ function gl_plot_bar_intensity{T}(thing::T,
     end
   end
 end
-
-function gl_plot_bar_intensity{T}(thing::T,
-                                  colors::Array{(Number,Number,Number), 1}, 
-                                  h::Number)
-  gl_plot_bar_intensity(thing, plot_range_of(thing), colors,h)
-end
-gl_plot_bar_intensity{T}(thing::T,colors::Array{(Number,Number,Number), 1}) =
-    gl_plot_bar_intensity(thing,colors, 1)
-
-const plot_grayscale_color = [(0,0,0), (1,1,1)]
-#TODO more color themes.
+gl_plot_bar_intensity{T}(thing::T, opts::Options) = 
+    gl_plot_bar_intensity(thing, @options)

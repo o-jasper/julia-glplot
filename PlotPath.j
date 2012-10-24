@@ -74,3 +74,16 @@ function after_i{F}(iter::PlotPath{F}, i::Integer)
   end
   return PlotPath(iter.fun, ax, iter.t, iter.d, iter.x)
 end
+
+#2d plot range of any iteratable
+function plot_range_of{Iterable}(seq::Iterable)
+    fx,fy, tx,ty = (typemax(Float64),typemax(Float64),
+                    typemin(Float64),typemin(Float64))
+    for el in seq
+        fx = min(fx, el[1])
+        fy = min(fy, el[2])
+        tx = max(tx, el[1])
+        ty = max(ty, el[2])
+    end
+    return (fx,fy, tx,ty)
+end

@@ -29,3 +29,8 @@ function incorporate{IArr}(h::HistogramLog{IArr}, x::Number, step::Integer)
     incorporate(h.p, log10(max(-x, h.low)), step)
   end
 end
+
+#TODO iterator, or it won't be able to plot.
+#start{IArr}(h::HistogramLog{IArr}) = start(h.field)
+#done{IArr,State}(h::HistogramLog{IArr},s::State) = done(h.field,s)
+#next{IArr,State}(h::HistogramLog{IArr},s::State) = next(h.field,s)

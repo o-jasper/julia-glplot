@@ -5,10 +5,8 @@ module JuliaGLPlotObjects
 #Just the objects for plotting without dependency to opengl or plotting 
 # facility (JuliaGLPlot does that)
 
-import Base.*
-import OJasper_Util.*
-import ExpandingArrayModule.*
-import DlmWriteIter.*
+import Base.*, OptionsMod.*
+import OJasper_Util.*, ExpandingArrayModule.*, DlmWriteIter.*
 
 include("../Field.j")
 include("../Field2d.j")
@@ -22,6 +20,10 @@ export Histogram,HistogramLog,HistogramLinArea,
 
 include("../PlotPath.j")
 export PlotPath
+
+#include("../ContinuousSeq.j")
+#export ContinuousSeq, ContinuousSeqIter, hist_now
+
 #inform_of_range,value_at
 end
 
