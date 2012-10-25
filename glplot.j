@@ -5,16 +5,12 @@ module JuliaGLPlot
 # facility (JuliaGLPlot does that)
 
 import Base.*, OptionsMod.*
-import OJasper_Util.*
-import Geom.*
-import ExpandingArrayModule.*
-
-import JuliaGLPlot.*
-
-import AutoFFI_GL.*
-import FFI_Extra_GL.*
+import OJasper_Util.*, Geom.*, ExpandingArrayModule.*
 
 import JuliaGLPlotObjects.*
+
+import AutoFFI_GL.*, FFI_Extra_GL.*
+import JuliaGLPlot.*
 
 include("../gl_plot.j")
 export gl_plot_under, gl_plot, gl_plot_filled_box,
@@ -24,12 +20,4 @@ include("../gl_plot_histogram.j")
 include("../gl_PlotPath.j")
 
 include("../gl_plot_ContinuousSeq.j")
-
-#NOTE: some of these will get deleted completely!
-#include("../util_fun.j") 
-#include("../plot_pwr.j")
-#include("../gl_plot_pwr.j")
-#include("../gl_plot_continuous.j")
-#export ContinuousPlot, FancyContinuousPlot,  
-#       timestep, cur_x
 end

@@ -8,9 +8,9 @@
 #
 
 function gl_plot_under{T}(mode::Integer, thing::T, opts::Options)
-  @defaults range = plot_range_of(thing)
-  @defaults to = range[2]
-  @defaults rectangular = false
+  @defaults opts range = plot_range_of(thing)
+  @defaults opts to = range[2]
+  @defaults opts rectangular = false
   
   thing = inform_of_range(thing, range)
   fx,fy,tx,ty = range #TODO keep in range on y dir.
@@ -70,17 +70,17 @@ gl_plot_box{T}(thing::T) = gl_plot_box(thing,@options)
 #TODO pretty sure it is wrong.
 #Returns the x where the line hits y=0 
 function exit_pos(sx,sy, ex,ey, range, epsilon)
-  fx,fy,tx,ty = range 
-  
-  dx = ex-sx #Fractions of x-passing-options.
-  f_fx,f_tx = (abs(dx)>epsilon ? ((sx-fx)/dx, (tx-sx)/dx) : (2,2))
+    fx,fy,tx,ty = range 
     
-  dy = ey-sy #Fractions of y-passing options.
-  f_fy,f_ty = (abs(dy)>epsilon ? ((sy-fy)/dy, (ty-sy)/dy) : (2,2))
-
-  g(x) = (x>0 ? x : 2)
-  fraction = min(g(f_fx),g(f_tx), g(f_fy),g(f_ty))
-  return [sx + dx*fraction, sy + dy*fraction] #Return position.
+    dx = ex-sx #Fractions of x-passing-options.
+    f_fx,f_tx = (abs(dx)>epsilon ? ((sx-fx)/dx, (tx-sx)/dx) : (2,2))
+    
+    dy = ey-sy #Fractions of y-passing options.
+    f_fy,f_ty = (abs(dy)>epsilon ? ((sy-fy)/dy, (ty-sy)/dy) : (2,2))
+    
+    g(x) = (x>0 ? x : 2)
+    fraction = min(g(f_fx),g(f_tx), g(f_fy),g(f_ty))
+    return [sx + dx*fraction, sy + dy*fraction] #Return position.
 end
 
 exit_pos(sx,sy,ex,ey, range) = exit_pos(sx,sy,ex,ey, range, 1e-9)
@@ -95,7 +95,7 @@ function gl_plot{T}(mode::Integer,thing::T, opts::Options)
   inside(x,y) = (x>=fx && y>=fy && x<=tx && y<=ty)
   @with glpushed() begin
     unit_frame_from(range) #_Manually_ using the iterator.
-    (px,py),iter_state = next(thing,start(thing)) 
+    (px,py),iter_state = next(thing,start(thing))
     inside_p::Bool = inside(px,py)
     if inside_p
       glbegin(mode)
@@ -126,10 +126,10 @@ function gl_plot{T}(mode::Integer,thing::T, opts::Options)
   end
 end
 
-gl_plot{T}(mode::Integer, thing::T)
-    gl_plot(mode, thing::T, @options)
-gl_plot{T}(thing::T, opts::Options)
-    gl_plot(GL_LINE_STRIP, thing::T, opts)
+gl_plot{T}(mode::Integer, thing::T) =
+    gl_plot(mode, thing, @options)
+gl_plot{T}(thing::T, opts::Options) =
+    gl_plot(GL_LINE_STRIP, thing, opts)
 gl_plot{T}(thing::T) =
     gl_plot(GL_LINE_STRIP, thing)
 
@@ -153,11 +153,14 @@ const plot_grayscale_color = [(0,0,0), (1,1,1)]
 
 #'bar intensity plot'.
 function gl_plot_bar_intensity{T}(thing::T, opts::Options)
-  @defaults range = plot_range_of(thing)
-  @defaults colors = plot_grayscale_color
-
+  @defaults opts range = plot_range_of(thing)
+  @defaults opts colors = plot_grayscale_color
+  
   thing = inform_of_range(thing, range)
   fx,fy, tx,ty = range
+  if fx==tx || fy == ty
+      return
+  end
   cur_color(y) = interpolate_color(y, fy,ty, colors)
   @with glpushed() begin
     unit_frame_from(fx,0, tx,1)
@@ -169,5 +172,4 @@ function gl_plot_bar_intensity{T}(thing::T, opts::Options)
     end
   end
 end
-gl_plot_bar_intensity{T}(thing::T, opts::Options) = 
-    gl_plot_bar_intensity(thing, @options)
+gl_plot_bar_intensity{T}(thing::T) = gl_plot_bar_intensity(thing, @options)

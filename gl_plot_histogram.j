@@ -11,7 +11,7 @@
 # in plot_gl.j!
 
 function gl_plot{IArr}(h::Histogram{IArr}, opts::Options)
-    @default opts to = 0
+    @defaults opts to = 0
     gl_plot_box(h, opts)
 end
 

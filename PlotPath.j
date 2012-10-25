@@ -1,3 +1,11 @@
+#
+#  Copyright (C) 24-10-2012 Jasper den Ouden.
+#
+#  This is free software: you can redistribute it and/or modify
+#  it under the terms of the GNU General Public License as published
+# by the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
 
 after_i{T}(iterable::T, i::Integer) = iterable[i:]
 inform_of_range(x, range) = x
@@ -73,17 +81,4 @@ function after_i{F}(iter::PlotPath{F}, i::Integer)
     throw("Incorrect bounds $i $(iter.d) $(iter.t)")
   end
   return PlotPath(iter.fun, ax, iter.t, iter.d, iter.x)
-end
-
-#2d plot range of any iteratable
-function plot_range_of{Iterable}(seq::Iterable)
-    fx,fy, tx,ty = (typemax(Float64),typemax(Float64),
-                    typemin(Float64),typemin(Float64))
-    for el in seq
-        fx = min(fx, el[1])
-        fy = min(fy, el[2])
-        tx = max(tx, el[1])
-        ty = max(ty, el[2])
-    end
-    return (fx,fy, tx,ty)
 end

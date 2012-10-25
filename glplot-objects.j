@@ -8,6 +8,8 @@ module JuliaGLPlotObjects
 import Base.*, OptionsMod.*
 import OJasper_Util.*, ExpandingArrayModule.*, DlmWriteIter.*
 
+include("../range.j")
+
 include("../Field.j")
 include("../Field2d.j")
 export Field,Field2d, ref_i
@@ -21,8 +23,8 @@ export Histogram,HistogramLog,HistogramLinArea,
 include("../PlotPath.j")
 export PlotPath
 
-#include("../ContinuousSeq.j")
-#export ContinuousSeq, ContinuousSeqIter, hist_now
+include("../ContinuousSeq.j")
+export ContinuousSeq, ContinuousSeqIter, hist_now
 
 #inform_of_range,value_at
 end
