@@ -51,13 +51,15 @@ function gl_plot_under{T}(mode::Integer, thing::T, opts::Options)
     end
   end
 end
-gl_plot_under{T}(thing::T) = gl_plot_under(thing, @options)
+gl_plot_under{T}(mode::Integer,thing::T) = gl_plot_under(mode,thing,@options)
 
-function gl_plot_above{T}(thing::T, opts::Options)
+function gl_plot_above{T}(mode::Integer, thing::T, opts::Options)
+    @defaults opts range = plot_range_of(thing)
+    @set_options opts range = range
     @set_options opts to = range[4]
-    gl_plot_under(thing, opts)
+    gl_plot_under(mode, thing, opts)
 end
-gl_plot_above{T}(thing::T) = gl_plot_above(thing,@options)
+gl_plot_above{T}(mode,thing::T) = gl_plot_above(mode, thing,@options)
 
 gl_plot_filled_box{T}(thing::T, opts::Options) =
     gl_plot_under(GL_QUADS, thing, opts)
@@ -126,12 +128,9 @@ function gl_plot{T}(mode::Integer,thing::T, opts::Options)
   end
 end
 
-gl_plot{T}(mode::Integer, thing::T) =
-    gl_plot(mode, thing, @options)
-gl_plot{T}(thing::T, opts::Options) =
-    gl_plot(GL_LINE_STRIP, thing, opts)
-gl_plot{T}(thing::T) =
-    gl_plot(GL_LINE_STRIP, thing)
+gl_plot{T}(mode::Integer, thing::T) = gl_plot(mode, thing, @options)
+gl_plot{T}(thing::T, opts::Options) = gl_plot(GL_LINE_STRIP, thing, opts)
+gl_plot{T}(thing::T)                = gl_plot(GL_LINE_STRIP, thing)
 
 function interpolate_color(x, f,t, colors)
   d = (t-f)/(length(colors)+1)

@@ -1,4 +1,6 @@
 
+load("options.jl")
+
 load("util/util.j")
 load("util/get_c.j")
 load("util/geom.j")
@@ -14,17 +16,12 @@ load("sdl_bad_utils/sdl_bad_utils.j")
 load("julia-glplot/glplot-objects.j")
 load("julia-glplot/glplot.j")
 
-import OJasper_Util.*
-import ExpandingArrayModule.*
-import ExpandingArrayModule.*
-import DlmWriteIter.*
+import OptionsMod.*
+import OJasper_Util.*, ExpandingArrayModule.*, DlmWriteIter.*
 
-import SDL_BadUtils.*
-import AutoFFI_GL.*
-import FFI_Extra_GL.*
+import SDL_BadUtils.*, AutoFFI_GL.*, FFI_Extra_GL.*
 
-import JuliaGLPlotObjects.*
-import JuliaGLPlot.*
+import JuliaGLPlotObjects.*, JuliaGLPlot.*
 
 function run_this()
   screen_width = 640
@@ -49,12 +46,15 @@ function run_this()
       function sqr(x)
         return x^2
       end
-      @with glpushed() gl_plot_under(PlotPath(sqr, -1,1), (-1,0,+1,+1))
+      @with glpushed() gl_plot_under(GL_LINES, PlotPath(sqr, (-1,1)),
+                                     @options range = (-1,0,+1,+1))
       glcolor(1,0,0)
-      @with glpushed() gl_plot(PlotPath(sqr), (-1,0,+1,+1))
+      @with glpushed() gl_plot(PlotPath(sqr))#, @options range=(-1,0,+1,+1))
       
-      @with glpushed() gl_plot(PlotPath( a->(cos(a),sin(a)), 0,2*pi),
-                               (-1,-1,+1,+1))
+      function cir(a)
+          return (cos(a),sin(a))
+      end
+      @with glpushed() gl_plot(PlotPath(cir, (0,2*pi), 200))
       
       glcolor(0,0,1)
       @with glpushed() gl_plot_filled_box(h)#, (0,0, 10,max(h)))

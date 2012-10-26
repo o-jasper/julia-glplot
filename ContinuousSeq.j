@@ -86,7 +86,7 @@ function incorporate{K}(cp::ContinuousSeq{K}, k::K, x::Number, opts::Options)
     end
 end
 incorporate{K}(cp::ContinuousSeq{K}, k::K, x::Number) =
-    incorporate(cp, k,x, @options )
+    incorporate(cp, k,x, @options)
 
 #Histogram of everything item of key.
 function hist_now{K,H}(cp::ContinuousSeq{K}, i::K, h::H)
