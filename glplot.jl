@@ -12,12 +12,12 @@ import JuliaGLPlotObjects.*
 import AutoFFI_GL.*, FFI_Extra_GL.*
 import JuliaGLPlot.*
 
-include("../gl_plot.j")
+load("julia-glplot/gl_plot.jl")
 export gl_plot_under, gl_plot, gl_plot_filled_box,
        gl_plot_bar_intensity, plot_grayscale_color
 #interpolate_color
-include("../gl_plot_histogram.j")
-include("../gl_PlotPath.j")
+load("julia-glplot/gl_plot_histogram.jl")
+load("julia-glplot/gl_PlotPath.jl")
 
-include("../gl_plot_ContinuousSeq.j")
+load("julia-glplot/gl_plot_ContinuousSeq.jl")
 end

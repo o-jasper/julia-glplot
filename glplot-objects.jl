@@ -8,22 +8,22 @@ module JuliaGLPlotObjects
 import Base.*, OptionsMod.*
 import OJasper_Util.*, ExpandingArrayModule.*, DlmWriteIter.*
 
-include("../range.j")
+load("julia-glplot/range.jl")
 
-include("../Field.j")
-include("../Field2d.j")
+load("julia-glplot/Field.jl")
+load("julia-glplot/Field2d.jl")
 export Field,Field2d, ref_i
 
-include("../Histogram.j")
-include("../HistogramLog.j")
-include("../HistogramLinArea.j")
+load("julia-glplot/Histogram.jl")
+load("julia-glplot/HistogramLog.jl")
+load("julia-glplot/HistogramLinArea.jl")
 export Histogram,HistogramLog,HistogramLinArea,
        incorporate, plot_range_of, inform_of_range
 
-include("../PlotPath.j")
+load("julia-glplot/PlotPath.jl")
 export PlotPath
 
-include("../ContinuousSeq.j")
+load("julia-glplot/ContinuousSeq.jl")
 export ContinuousSeq, ContinuousSeqIter, hist_now
 
 #inform_of_range,value_at

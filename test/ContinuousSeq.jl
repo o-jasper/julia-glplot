@@ -1,20 +1,20 @@
 
 load("options.jl")
 
-load("util/util.j")
-load("util/get_c.j")
-load("util/geom.j")
+load("util/util.jl")
+load("util/get_c.jl")
+load("util/geom.jl")
 
-load("util/ExpandingArray.j")
-load("util/dlmwrite_iter.j")
+load("util/ExpandingArray.jl")
+load("util/dlmwrite_iter.jl")
 
-load("autoffi/gl.j")
-load("ffi_extra/gl.j")
+load("autoffi/gl.jl")
+load("ffi_extra/gl.jl")
 
-load("sdl_bad_utils/sdl_bad_utils.j")
+load("sdl_bad_utils/sdl_bad_utils.jl")
 
-load("julia-glplot/glplot-objects.j")
-load("julia-glplot/glplot.j")
+load("julia-glplot/glplot-objects.jl")
+load("julia-glplot/glplot.jl")
 
 import OptionsMod.*
 import OJasper_Util.*, ExpandingArrayModule.*, DlmWriteIter.*

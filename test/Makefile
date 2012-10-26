@@ -2,7 +2,7 @@
 default: test_all
 
 #Note: nonzero output doesn't indicate necessarily error.
-test_all: gl_plot_continuous plot_n_hist
+test_all: ContinuousSeq plot_n_hist
 
 ContinuousSeq:
 	sh test.sh ContinuousSeq
