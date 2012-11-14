@@ -20,7 +20,7 @@ type PlotPath{F}
     t::Float64 #Ending position.
     d::Float64 #Step.
     
-    x::Float64 #Current position.
+    x::Float64 #Current position. #TODO cant this be omitted?
 end
 
 PlotPath{F}(fun::F, s::Number,t::Number,d::Number,x::Number) =

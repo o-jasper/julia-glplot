@@ -26,6 +26,9 @@ export PlotPath
 load("julia-glplot/ContinuousSeq.jl")
 export ContinuousSeq, ContinuousSeqIter, hist_now
 
+load("julia-glplot/RangeTicks.jl")
+export RangeTicks, XYRangeTicks
+
 #inform_of_range,value_at
 end
 

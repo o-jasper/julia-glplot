@@ -8,48 +8,54 @@
 #
 
 function gl_plot_under{T}(mode::Integer, thing::T, opts::Options)
-  @defaults opts range = plot_range_of(thing)
-  @defaults opts to = range[2]
-  @defaults opts rectangular = false
-  
-  thing = inform_of_range(thing, range)
-  fx,fy,tx,ty = range #TODO keep in range on y dir.
-  @with glpushed() begin
-    unit_frame_from(range)
-    if mode==GL_QUAD_STRIP && !rectangular
-      glbegin(mode)
-    end
-    px,py = float64(0),float64(0) #Find first one.
-    el,iter_state = next(thing,start(thing)) #_Manually_ using the iterator.
-    px,py = el
-    while px < fx && !done(thing,iter_state)
-      el,iter_state = next(thing,iter_state)
-      px,py = el
-    end 
-    vertex(x,y) = #! #Bit inefficient, clamping all of them.
-        glvertex(clamp(x, fx,tx),clamp(y,fy,ty))
+    @defaults opts range = plot_range_of(thing)
+    @defaults opts to = range[2]
+    @defaults opts rectangular = false
     
-    while !done(thing,iter_state)
-      if mode!=GL_QUAD_STRIP || rectangular
-        glbegin(mode)
-      end
-      (x,y),iter_state = next(thing,iter_state)
-      vertex(x,y)
-      vertex(x,float64(to))
-      if mode!=GL_QUAD_STRIP || rectangular
-        vertex(px,float64(to))
-        vertex(px, rectangular ? y : py)
-        glend()
-      end
-      if x>tx #Stop at end.
-        break
-      end
-      px,py = (x,y)
+    iter_state = start(thing)
+    if done(thing, iter_state)
+        return
+    end     
+    el,iter_state = next(thing,iter_state) #_Manually_ using the iterator.
+    
+    thing = inform_of_range(thing, range)
+    fx,fy,tx,ty = range #TODO keep in range on y dir.
+    @with glpushed() begin
+        unit_frame_from(range)
+        if mode==GL_QUAD_STRIP && !rectangular
+            glbegin(mode)
+        end
+        px,py = float64(0),float64(0) #Find first one.
+        
+        px,py = el
+        while px < fx && !done(thing,iter_state)
+            el,iter_state = next(thing,iter_state)
+            px,py = el
+        end 
+        vertex(x,y) = #! #Bit inefficient, clamping all of them.
+        glvertex(clamp(x, fx,tx),clamp(y,fy,ty))
+        
+        while !done(thing,iter_state)
+            if mode!=GL_QUAD_STRIP || rectangular
+                glbegin(mode)
+            end
+            (x,y),iter_state = next(thing,iter_state)
+            vertex(x,y)
+            vertex(x,float64(to))
+            if mode!=GL_QUAD_STRIP || rectangular
+                vertex(px,float64(to))
+                vertex(px, rectangular ? y : py)
+                glend()
+            end
+            if x>tx #Stop at end.
+               break
+            end
+            px,py = (x,y)
+        end
+        if mode==GL_QUAD_STRIP && !rectangular
+            glend()
+        end
     end
-    if mode==GL_QUAD_STRIP && !rectangular
-      glend()
-    end
-  end
 end
 gl_plot_under{T}(mode::Integer,thing::T) = gl_plot_under(mode,thing,@options)
 
@@ -88,44 +94,51 @@ end
 exit_pos(sx,sy,ex,ey, range) = exit_pos(sx,sy,ex,ey, range, 1e-9)
 
 function gl_plot{T}(mode::Integer,thing::T, opts::Options)
-  @defaults opts range = plot_range_of(thing)
-  thing = inform_of_range(thing, range)
-  fx,fy,tx,ty = range
-  if fx==tx || fy==ty
-    return #TODO this should be some problem.
-  end
-  inside(x,y) = (x>=fx && y>=fy && x<=tx && y<=ty)
-  @with glpushed() begin
-    unit_frame_from(range) #_Manually_ using the iterator.
-    (px,py),iter_state = next(thing,start(thing))
-    inside_p::Bool = inside(px,py)
-    if inside_p
-      glbegin(mode)
-      glvertex(px,py)
+    @defaults opts range = plot_range_of(thing)
+    
+    iter_state = start(thing)
+    if done(thing, iter_state)
+        return
+    end     
+    el,iter_state = next(thing,iter_state) #_Manually_ using the iterator.
+    
+    thing = inform_of_range(thing, range)
+    fx,fy,tx,ty = range
+    if fx==tx || fy==ty
+        return #TODO this should be some problem.
     end
-    while !done(thing, iter_state)
-      (x,y),iter_state = next(thing,iter_state)
-      if inside_p
-        if inside(x,y) #Staying inside.
-          glvertex(x,y)
-        else #Going inside, find where.
-          glvertex(exit_pos(px,py, x,y, range))
-          glend()
-          inside_p = false
+    inside(x,y) = (x>=fx && y>=fy && x<=tx && y<=ty)
+    @with glpushed() begin
+        unit_frame_from(range) #_Manually_ using the iterator.
+        px,py = el
+        inside_p::Bool = inside(px,py)
+        if inside_p
+            glbegin(mode)
+            glvertex(px,py)
         end
-      else
-        if inside(x,y) #Just getting back inside, find where.
-          glbegin(mode)
-          glvertex(exit_pos(px,py, x,y, range))
-          inside_p = true
+        while !done(thing, iter_state)
+            (x,y),iter_state = next(thing,iter_state)
+            if inside_p
+                if inside(x,y) #Staying inside.
+                    glvertex(x,y)
+                else #Going inside, find where.
+                    glvertex(exit_pos(px,py, x,y, range))
+                    glend()
+                    inside_p = false
+                end
+            else
+                if inside(x,y) #Just getting back inside, find where.
+                    glbegin(mode)
+                    glvertex(exit_pos(px,py, x,y, range))
+                    inside_p = true
+                end
+            end
+            px,py = (x,y)
         end
-      end
-      px,py = (x,y)
+        if inside_p #End any current lines.
+            glend()
+        end
     end
-    if inside_p #End any current lines.
-      glend()
-    end
-  end
 end
 
 gl_plot{T}(mode::Integer, thing::T) = gl_plot(mode, thing, @options)

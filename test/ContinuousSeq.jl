@@ -38,13 +38,18 @@ function run_this()
     next_add_t = time() -1
     start_t = time()
     
+    dx = 0
+    dy = 0
     function inc()
         t = time()-start_t
         incorporate(seq, :t, t)
-        x = (1+sin(time()))/2 + randexp()/10 + 2*rand()^10
-        incorporate(seq, :x, x)
-        incorporate(seq, :y, x+rand())
-        wait_time = rand()/3
+        dx += 0.1*(2*rand() - 1) - 0.001*dx
+        x = (1+sin(time()))/2
+        incorporate(seq, :x, x+dx)
+        dy += rand()-0.5
+        incorporate(seq, :y, x)
+        dy = (2*dy+dx)/3
+        wait_time = 0.1*rand()
         next_add_t = time() + wait_time
     end
     while(true)
@@ -54,16 +59,25 @@ function run_this()
         
         @with glpushed() begin
             unit_frame_to(-1,-1, 1,1)
+            range = plot_range_of(seq, (:t,[:x,:y]))
             @with glpushed() begin
                 unit_frame_to(0,0.1, 1,1)
                 glcolor(0,1,0)
-                gl_plot(seq, (:t,[:x,:y]))
-#                glcolor(0,0,1)
-#                gl_plot(seq, (:t,:y))
+                gl_plot(seq, (:t,[:x,:y, :z]), @options range=range)
+#                gl_plot(seq, (:t,:q))
             end
             @with glpushed() begin
                 unit_frame_to(0,0, 1,0.1)
-                gl_plot_bar_intensity(seq, (:t,[:x,:y]))
+                gl_plot_bar_intensity(seq, (:t,[:x,:y]), @options range=range)
+            end
+            glcolor(1,1,1)
+            @with glpushed() begin
+                unit_frame_to(0,0.1, 1,0.2)
+                draw_ticks_x(RangeTicks(range[1],range[3]))
+            end
+            @with glpushed() begin
+                unit_frame_to(0,0, 0.1,1)
+                draw_ticks_y(RangeTicks(range[2],range[4]))
             end
         end
         

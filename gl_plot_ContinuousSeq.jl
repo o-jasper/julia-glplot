@@ -43,7 +43,7 @@ function gl_plot_bar_intensity{K}(cp::ContinuousSeq{K}, ij::Vector{(K,K)},
     @defaults opts range = plot_range_of(cp, ij, opts)
     @set_options opts range = range
     len = length(ij)
-    glscale(1,1/len)
+    glscale(1,1/(len+1))
     @with glpushed() for el in ij
         gltranslate(0,1)
         gl_plot_bar_intensity(ContinuousSeqIter(cp,el), opts)

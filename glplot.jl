@@ -20,4 +20,8 @@ load("julia-glplot/gl_plot_histogram.jl")
 load("julia-glplot/gl_PlotPath.jl")
 
 load("julia-glplot/gl_plot_ContinuousSeq.jl")
+
+load("julia-glplot/gl_plot_RangeTicks.jl")
+export draw_ticks_x, draw_ticks_y
+
 end

@@ -39,22 +39,27 @@ end
 ContinuousSeqIter{K}(at::ContinuousSeq, ij::(K,K)) =
     ContinuousSeqIter(at.seq, ij[1],ij[2])
 
-start{K}(at::ContinuousSeqIter{K}) = int64(1)
-function next{K}(at::ContinuousSeqIter{K}, k::Int64)
+function start{K}(at::ContinuousSeqIter{K})
+    k = 1
     while k <= length(at.seq) && at.i != at.seq[k][1]
         k+=1
     end
+    return int64(k)
+end
+function next{K}(at::ContinuousSeqIter{K}, k::Int64)
+    assert( k>=1 && !isempty(at.seq) )
     ik = k
-    while k <= length(at.seq) && at.j != at.seq[k][1]
+    while k < length(at.seq) && at.j != at.seq[k][1]
         k+=1
     end
     jk = k
-    while k <= length(at.seq) && at.i != at.seq[k][1]
+    while k < length(at.seq) && at.i != at.seq[k][1]
         k+=1
     end
     return ((at.seq[ik][2],at.seq[jk][2]), k)
 end
-done{K}(at::ContinuousSeqIter{K}, k::Int64) = (k >= length(at.seq))
+done{K}(at::ContinuousSeqIter{K}, k::Int64) =
+    isempty(at.seq) || (k >= length(at.seq))
 
 function drop_excess{K}(cp::ContinuousSeq{K})
   #Keep popping until before the end of duration.
@@ -155,5 +160,10 @@ function plot_range_of{K}(cp::ContinuousSeq{K}, ij::Vector{(K,K)},
     return flow_range_p ? timestep_range(cp, ij[1], aim_range, at_t) : 
                           aim_range
 end
+
+plot_range_of{K}(cp::ContinuousSeq{K}, ij::(K,Vector{K}),
+                 opts::Options) =
+    plot_range_of(cp, map((j)->(ij[1],j), ij[2]), opts)
+
 plot_range_of{K,IJ}(cp::ContinuousSeq{K}, ij::IJ) = 
     plot_range_of(cp, ij, @options)
