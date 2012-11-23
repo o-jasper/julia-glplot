@@ -6,6 +6,10 @@
 # by the Free Software Foundation, either version 3 of the License, or
 # (at your option) any later version.
 #
+const maximum_range = (typemin(Float64),typemin(Float64),
+                       typemax(Float64),typemax(Float64))
+const minimum_range = (typemax(Float64),typemax(Float64),
+                       typemin(Float64),typemin(Float64))
 
 #Combining ranges inclusively.
 union_range(a::(Float64,Float64,Float64,Float64),
@@ -24,11 +28,6 @@ intersect_range(a::(Float64,Float64,Float64,Float64),
 intersect_range(l::Vector) = 
     length(l)==1 ? l[1] : union_range(l[1],union_range(l[2:]))
 intersect_range(l...) = union_range(l)
-
-const maximum_range = (typemin(Float64),typemin(Float64),
-                       typemax(Float64),typemax(Float64))
-const minimum_range = (typemax(Float64),typemax(Float64),
-                       typemin(Float64),typemin(Float64))
 
 #2d plot range of any iterable
 function plot_range_of{Iterable}(seq::Iterable, opts::Options)

@@ -11,7 +11,7 @@ HistogramLog(low::Number, d::Number, I) =
                  Field(0,d, ExpandingArray(I)), 
                  Field(0,d, ExpandingArray(I)))
 
-HistogramLog(low::Number, d::Number) = HistogramLog(low,d, Int64)
+HistogramLog(low::Number, d::Number) = HistogramLog(low,d, Float64)
 
 length{IArr}(h::HistogramLog{IArr}) = length(h.n) + length(h.p)
 
