@@ -39,10 +39,10 @@ timestep_range(vr::ViewRange, aim_range) =
 
 #What the viewrane is for, making plot ranges.
 function plot_range_of(vr::ViewRange, opts::Options)
-    @defaults opts set_range = false
+    @defaults opts set_range = false aim_range = nothing
     if set_range #Set the range.
         vr.range = aim_range
-    else
+    elseif !is(aim_range, nothing)
         @defaults opts at_t = time() typ_time = vr.typ_time
         timestep_range(vr, aim_range, at_t, typ_time)
     end

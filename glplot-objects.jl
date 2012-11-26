@@ -23,8 +23,11 @@ export Histogram,HistogramLog,HistogramLinArea,
 load("julia-glplot/PlotPath.jl")
 export PlotPath
 
-load("julia-glplot/ContinuousSeq.jl")
+load("julia-glplot/ContinuousSeq/ContinuousSeq.jl")
 export ContinuousSeq, ContinuousSeqIter, hist_now
+
+load("julia-glplot/ContinuousSeq/ViewRange.jl")
+export ViewRange, timestep_range
 
 load("julia-glplot/RangeTicks.jl")
 export RangeTicks, XYRangeTicks

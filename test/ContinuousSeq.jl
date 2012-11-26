@@ -31,7 +31,8 @@ function run_this()
     mx()  = mx(mouse_x())
     my()  = my(mouse_y())
     
-    seq = ContinuousSeq(Symbol,0.5)
+    seq = ContinuousSeq(Symbol)
+    vr = ViewRange(0.5)
     
     assign(seq.duration, float64(10), :t)
     
@@ -59,7 +60,8 @@ function run_this()
         
         @with glpushed() begin
             unit_frame_to(-1,-1, 1,1)
-            range = plot_range_of(seq, (:t,[:x,:y]))
+            timestep_range(vr, plot_range_of(seq, (:t,[:x,:y])))
+            range = plot_range_of(vr)
             @with glpushed() begin
                 unit_frame_to(0,0.1, 1,1)
                 glcolor(0,1,0)

@@ -19,7 +19,7 @@ export gl_plot_under, gl_plot, gl_plot_filled_box,
 load("julia-glplot/gl_plot_histogram.jl")
 load("julia-glplot/gl_PlotPath.jl")
 
-load("julia-glplot/gl_plot_ContinuousSeq.jl")
+load("julia-glplot/ContinuousSeq/gl_plot_ContinuousSeq.jl")
 
 load("julia-glplot/gl_plot_RangeTicks.jl")
 export draw_ticks_x, draw_ticks_y
