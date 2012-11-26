@@ -54,7 +54,7 @@ function FancyKeyedData{K}(kd::KeyedData{K}, opts::Options) #TODO make macro for
         end
     end
     @defaults opts inc_hist =  HistogramLog(inc_hist_low,inc_hist_d) inc_hist_size = 0.1
-    @defaults opts viewrange_typ_time= 10.0
+    @defaults opts viewrange_typ_time= 0.5
     return FancyKeyedData(kd,
                           pv, float32(plot_size), 
                           (float32(ticks_size[1]),float32(ticks_size[2])),
@@ -86,11 +86,13 @@ main_plot{K,T}(fkd::FancyKeyedData{K}, vars::T, opts::Options) =
     main_plot(fkd, prep_vars(vars), opts)
 main_plot{K,T}(fkd::FancyKeyedData{K}, vars::T) = main_plot(fkd, vars, @options)
 
+#TODO sizes <0 to indicate on opposite side?
+
 function gl_plot{K}(kd::FancyKeyedData{K}, opts::Options)
     @defaults opts plot_size = kd.plot_size bar_size = kd.bar_size
     @defaults opts default_view_range_typ_time = kd.viewrange_typ_time
 #    @defaults opts view_range_typ_time = kd.viewrange_typ_time
-    if plot_size > 0 && !isempty(kd.plot_vars)
+    if plot_size>0 && !isempty(kd.plot_vars)
         vr = get_data(kd, kd.plot_vars[1], ViewRange, nothing)
         if is(vr,nothing) #None exists yet, make it.
             vr = ViewRange(default_view_range_typ_time)
@@ -98,9 +100,10 @@ function gl_plot{K}(kd::FancyKeyedData{K}, opts::Options)
         end
         #TODO range seems shocky...
         timestep_range(vr, plot_range_of(kd.kd.seq, kd.plot_vars))
-        range = plot_range_of(vr)
+        @defaults opts range = plot_range_of(vr)
+        @set_options opts range = range
         @with glpushed() begin
-            unit_frame_to(0,bar_size, 1,bar_size + plot_size)
+            unit_frame_to(0,bar_size, 1,bar_size + plot_size)            
             gl_plot(kd.kd, kd.plot_vars, opts)
             @defaults opts ticks_size = kd.ticks_size
             tx,ty = isa(ticks_size, (Number,Number)) ? ticks_size :

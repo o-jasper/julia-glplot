@@ -20,14 +20,13 @@ ViewRange() = ViewRange(0.1)
 function timestep_range(vr::ViewRange, aim_range, at_t,typ_time)
     if typ_time==0 || vr.t==typemin(Float64) #Go straight there.
         vr.range = aim_range
-    else
-        afx,afy,atx,aty = aim_range
+    else #TODO when aim range way off from the real aim, step on it.
+        delta_t= at_t - vr.t
+        e = exp(-delta_t/typ_time) #Weighed average.
+        g(i,f) = i*e + f*(1-e) #Use initial and final positions to get current.
         fx,fy,tx,ty = vr.range
-        t= vr.t
-        f = exp((at_t-t)/typ_time)-1 #Weighed average.
-        o,n = 1/(1+f), f/(1+f)
-        vr.range = (n*afx + o*fx, n*afy + o*fy, 
-                    n*atx + o*tx, n*aty + o*ty)
+        afx,afy,atx,aty = aim_range
+        vr.range = (g(fx,afx), g(fy,afy), g(tx,atx),  g(ty,aty))
     end
     vr.t = at_t
     return vr.range
