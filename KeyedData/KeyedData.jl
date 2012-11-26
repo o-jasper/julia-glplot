@@ -7,19 +7,16 @@
 # (at your option) any later version.
 #
 
-type PointDuration #Info on how long it keeps a single point.
-    duration::Float64
-end
-PointDuration(d::Number) = PointDuration(float64(d))
+#keysort{T}(arr::Array{T,1})   = sort(arr)
+#keysort(arr::Array{Symbol},1) = map(symbol, sort(map(x->"$x", arr)))
 
-incorporate(pd::PointDuration, whatever...) = nothing
-
-type Single{K}
+type DataEl{K}
     last_val::Float64
     trigger_also::Array{K,1}
+    incorporate_seq_p::Bool
     data::Dict{CompositeKind,Any}
 end
-Single(K) = Single(typemin(Float64), Array(K,0),{},{}, 
+Single(K) = Single(typemin(Float64), Array(K,0),{},{}, true,
                    PointDuration(typemax(Float64)))
 
 type Pair{K}
@@ -43,21 +40,13 @@ function ensure_single{K}(kd::KeyedData{K}, k::K)
     return (is(got, nothing) ? assign(kd.single, k, Single(K)) : got)
 end
 #Set/add single keyed data.
-set_single_data{K}(kd::KeyedData{K}, to_key::K, set) = #!
+set_single_data{K}(set, kd::KeyedData{K}, to_key::K) = #!
     assign(ensure_single(kd,to_key).data, typeof(added), set) 
-
-set_single_data{K}(kd::KeyedData{K}, to_key::K, set::PointDuration) = #!
-    assign(kd.seq.duration, to_key, set.duration)
 #Get single keyed data.
 function get_single_data{K}(kd::KeyedData{K}, 
                             get_key::K,get_tp::CompositeKind, otherwise)
     got = get(kd.single, get_key, nothing)
     return (is(got,nothing) ? nothing : get(got.data, get_tp, nothing))
-end
-function get_single_data{K}(kd::KeyedData{K}, get_key::K,
-                            get_tp::Type{PointDuration}, otherwise)
-    got = get(kd.seq.duration,get_key, nothing)
-    return (is(got, nothing) ? otherwise : PointDuration(got))
 end
 
 get_single_data{K}(kd::KeyedData{K}, get_key::K,get_tp::CompositeKind) =
@@ -68,7 +57,7 @@ function ensure_pair{K}(kd::KeyedData{K}, ij::(K,K))
     return (is(got, nothing) ? assign(kd.pair, k, Pair{K}()) : got)
 end
 #Set pair keyed data.
-set_pair_data{K}(kd::KeyedData{K}, ij::(K,K), set) = #!
+set_pair_data{K}(set, kd::KeyedData{K}, ij::(K,K)) = #!
     assign(ensure_pair(kd,ij).data, typeof(added), set)
 #Get pair keyed data.
 get_pair_data{K}(kd::KeyedData{K}, ij::(K,K), otherwise) =
@@ -77,8 +66,10 @@ get_pair_data{K}(kd::KeyedData{K}, ij::(K,K)) =
     get_pair_data(kd, ij, nothing)
 
 function incorporate{K}(kd::KeyedData{K}, k::K, x,step)
-    incorporate(kd, k,x)
-    single = ensure_single(kd.single,k)
+    single = ensure_single(kd.single,k) #TODO defaults on those?
+    if single.incorporate_seq_p
+        incorporate(kd.seq, k,x)
+    end
     single.last_val = x
     for kv in single.data #Incorporate into all of them.
         k,v = kv #(k==typeof(v))
@@ -94,3 +85,19 @@ function incorporate{K}(kd::KeyedData{K}, k::K, x,step)
     end
 end
 incorporate{K}(kd::KeyedData{K}, x,y) = incorporate(kd, x,y,1)
+
+#PointDuration has a special position, to allow ContinuousSeq to do stuff itself.
+type PointDuration #Info on how long it keeps a single point.
+    duration::Float64
+end
+PointDuration(d::Number) = PointDuration(float64(d))
+
+incorporate(pd::PointDuration, whatever...) = nothing
+
+set_single_data{K}(set::PointDuration, kd::KeyedData{K}, to_key::K) = #!
+    assign(kd.seq.duration, to_key, set.duration)
+function get_single_data{K}(kd::KeyedData{K}, get_key::K,
+                            get_tp::Type{PointDuration}, otherwise)
+    got = get(kd.seq.duration,get_key, nothing)
+    return (is(got, nothing) ? otherwise : PointDuration(got))
+end
