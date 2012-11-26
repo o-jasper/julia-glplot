@@ -43,7 +43,7 @@ function incorporate(pa::PairSum, x,y,step)
 end
 incorporate(pa::PairSum, x,y,step) = incorporate(pa, x,y,1)
 
-function correlation(xy::PairSum, x::Accum,y::Accum)
-    return (pa.cnt*pa.sum_xy - x.sum*y.sum) /
-           (pa.cnt*sqr(x.sum_sqr - x.sum^2)*(y.sum_sqr - y.sum^2))
+function correlation(xy::PairSum, x::SingleSum,y::SingleSum)
+    return( (pa.cnt*pa.sum_xy - x.sum*y.sum) /
+            (pa.cnt*sqr(x.sum_sqr - x.sum^2)*(y.sum_sqr - y.sum^2)) )
 end

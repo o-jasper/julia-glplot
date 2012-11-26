@@ -12,3 +12,9 @@ gl_plot{K}(kd::KeyedData{K}, ij::Union((K,K),Vector{(K,K)},(K,Vector{K})), opts:
     gl_plot(kd.seq, ij, opts)
 gl_plot{K}(kd::KeyedData{K}, ij::Union((K,K),Vector{(K,K)},(K,Vector{K}))) =
     gl_plot(kd, ij, @options)
+
+gl_plot_bar_intensity{K}(kd::KeyedData{K}, ij::Union((K,K),Vector{(K,K)},(K,Vector{K})), 
+                         opts::Options) =
+    gl_plot(kd.seq, ij, opts)
+gl_plot_bar_intensity{K}(kd::KeyedData{K}, ij::Union((K,K),Vector{(K,K)},(K,Vector{K}))) =
+    gl_plot(kd, ij, @options)

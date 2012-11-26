@@ -7,66 +7,70 @@
 # (at your option) any later version.
 #
 
-#keysort{T}(arr::Array{T,1})   = sort(arr)
-#keysort(arr::Array{Symbol},1) = map(symbol, sort(map(x->"$x", arr)))
-
-type DataEl{K}
+type Single{K}
     last_val::Float64
     trigger_also::Array{K,1}
     incorporate_seq_p::Bool
     data::Dict{CompositeKind,Any}
 end
-Single(K) = Single(typemin(Float64), Array(K,0),{},{}, true,
-                   PointDuration(typemax(Float64)))
-
-type Pair{K}
-    data::Dict{CompositeKind,Any}
-end
-Pair{K}() = Pair{K}(Dict{CompositeKind,Any}())
+Single(K) = Single(typemin(Float64), Array(K,0), 
+                   true,Dict{CompositeKind,Any}())
 
 type KeyedData{K}
     single::Dict{K, Single{K}}
-    pair::Dict{(K,K), Array{Any,1}}
+    set::Dict{(K...), Dict{CompositeKind,Any}}
 
     seq::ContinuousSeq{K}
 end
 KeyedData(K) =
-    KeyedData(Dict{K,Single{K}}(), Dict{(K,K),Array{Any,1}}(),
-              Array((K,Float64),0), Dict{K,Float64}())
+    KeyedData(Dict{K,Single{K}}(), Dict{(K...),Dict{CompositeKind,Any}}(), 
+              ContinuousSeq(K))
 
 #Get single entry, create if it doesnt exist.
 function ensure_single{K}(kd::KeyedData{K}, k::K)
     got = get(kd.single, k,nothing)
-    return (is(got, nothing) ? assign(kd.single, k, Single(K)) : got)
+    if is(got, nothing) 
+        got = Single(K)
+        assign(kd.single,got, k)
+    end
+    return got
 end
 #Set/add single keyed data.
-set_single_data{K}(set, kd::KeyedData{K}, to_key::K) = #!
-    assign(ensure_single(kd,to_key).data, typeof(added), set) 
+function set_data{K}(kd::KeyedData{K}, to_key::K, set)
+    assign(ensure_single(kd,to_key).data, set,typeof(set))
+    return set
+end
 #Get single keyed data.
-function get_single_data{K}(kd::KeyedData{K}, 
-                            get_key::K,get_tp::CompositeKind, otherwise)
+function get_data{K}(kd::KeyedData{K}, 
+                     get_key::K,get_tp::CompositeKind, otherwise)
     got = get(kd.single, get_key, nothing)
     return (is(got,nothing) ? nothing : get(got.data, get_tp, nothing))
 end
 
-get_single_data{K}(kd::KeyedData{K}, get_key::K,get_tp::CompositeKind) =
-    get_single_data(kd, get_key,get_tp, nothing)
+get_data{K}(kd::KeyedData{K}, get_key::K,get_tp::CompositeKind) =
+    get_data(kd, get_key,get_tp, nothing)
 #Get pair entry, create if it doesnt exist.
-function ensure_pair{K}(kd::KeyedData{K}, ij::(K,K))
-    got = get(kd.pair, ij,nothing)
-    return (is(got, nothing) ? assign(kd.pair, k, Pair{K}()) : got)
+function ensure_tuple{K}(kd::KeyedData{K}, ij::(K...))
+    got = get(kd.set, ij,nothing)
+    if is(got, nothing)
+        got = Dict{CompositeKind,Any}()
+        assign(kd.set, got, ij)
+    end
+    return got
 end
-#Set pair keyed data.
-set_pair_data{K}(set, kd::KeyedData{K}, ij::(K,K)) = #!
-    assign(ensure_pair(kd,ij).data, typeof(added), set)
-#Get pair keyed data.
-get_pair_data{K}(kd::KeyedData{K}, ij::(K,K), otherwise) =
-    get(ensure_pair(kd,ij).data, typeof(added), otherwise)
-get_pair_data{K}(kd::KeyedData{K}, ij::(K,K)) = 
-    get_pair_data(kd, ij, nothing)
+#Set/add tuple keyed data.
+function set_data{K}(kd::KeyedData{K}, ij::(K...), set)
+    assign(ensure_tuple(kd,ij), set, typeof(set))
+    return set
+end
+#Set/add tuple keyed data.
+get_data{K}(kd::KeyedData{K}, ij::(K...), tp::CompositeKind, otherwise) =
+    get(ensure_tuple(kd,ij), tp, otherwise)
+get_data{K}(kd::KeyedData{K}, ij::(K...), tp::CompositeKind) = 
+    get_data(kd, ij, tp, nothing)
 
 function incorporate{K}(kd::KeyedData{K}, k::K, x,step)
-    single = ensure_single(kd.single,k) #TODO defaults on those?
+    single = ensure_single(kd,k)
     if single.incorporate_seq_p
         incorporate(kd.seq, k,x)
     end
@@ -75,14 +79,18 @@ function incorporate{K}(kd::KeyedData{K}, k::K, x,step)
         k,v = kv #(k==typeof(v))
         incorporate(v, x,step)
     end
-    for tk in single.trigger_also #Add stuff to whatever is triggered.
-        for el in get(kd.pair, (tk,k),{})
-            got = get(kd.single, tk, nothing)
-            if !is(got, nothing) && got.last_val != typemin(Float64)
-                incorporate(el, x,got.last_val, step)
-            end
-        end
-    end
+#TODO    
+#    for tk in single.trigger_also #Add stuff to whatever is triggered.
+#        got = get(kd.single, tk, nothing)
+#        if !is(got,nothing) && got.last_val!=typemin(Float64)
+#            set = get(kd.set, (tk,k), nothing)
+#            if !is(set, nothing)
+#                for el in set
+#                    incorporate(el[2], x,got.last_val, step)
+#                end
+#            end
+#        end
+#    end
 end
 incorporate{K}(kd::KeyedData{K}, x,y) = incorporate(kd, x,y,1)
 
@@ -94,9 +102,9 @@ PointDuration(d::Number) = PointDuration(float64(d))
 
 incorporate(pd::PointDuration, whatever...) = nothing
 
-set_single_data{K}(set::PointDuration, kd::KeyedData{K}, to_key::K) = #!
-    assign(kd.seq.duration, to_key, set.duration)
-function get_single_data{K}(kd::KeyedData{K}, get_key::K,
+set_data{K}(kd::KeyedData{K}, to_key::K, set::PointDuration) = #!
+    assign(kd.seq.duration, set.duration, to_key)
+function get_data{K}(kd::KeyedData{K}, get_key::K,
                             get_tp::Type{PointDuration}, otherwise)
     got = get(kd.seq.duration,get_key, nothing)
     return (is(got, nothing) ? otherwise : PointDuration(got))
