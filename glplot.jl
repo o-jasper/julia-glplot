@@ -13,7 +13,7 @@ import AutoFFI_GL.*, FFI_Extra_GL.*
 import JuliaGLPlot.*
 
 load("julia-glplot/gl_plot.jl")
-export gl_plot_under, gl_plot, gl_plot_filled_box,
+export gl_plot_under, gl_plot, gl_plot_box,gl_plot_filled_box,
        gl_plot_bar_intensity, plot_grayscale_color
 #interpolate_color
 load("julia-glplot/gl_plot_histogram.jl")

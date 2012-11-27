@@ -20,6 +20,9 @@ function gl_plot_under{T}(mode::Integer, thing::T, opts::Options)
     
     thing = inform_of_range(thing, range)
     fx,fy,tx,ty = range #TODO keep in range on y dir.
+    if fx==tx || fy==ty
+        return
+    end
     @with glpushed() begin
         unit_frame_from(range)
         if mode==GL_QUAD_STRIP && !rectangular
@@ -67,12 +70,16 @@ function gl_plot_above{T}(mode::Integer, thing::T, opts::Options)
 end
 gl_plot_above{T}(mode,thing::T) = gl_plot_above(mode, thing,@options)
 
-gl_plot_filled_box{T}(thing::T, opts::Options) =
+function gl_plot_filled_box{T}(thing::T, opts::Options)
+    @set_options opts rectangular = true
     gl_plot_under(GL_QUADS, thing, opts)
+end
 gl_plot_filled_box{T}(thing::T) = gl_plot_filled_box(thing,@options)
 
-gl_plot_box{T}(thing::T, opts::Options) =
+function gl_plot_box{T}(thing::T, opts::Options)
+    @set_options opts rectangular = true
     gl_plot_under(GL_LINE_LOOP, thing, opts)
+end
 gl_plot_box{T}(thing::T) = gl_plot_box(thing,@options)
 
 #TODO pretty sure it is wrong.

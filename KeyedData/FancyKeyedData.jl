@@ -19,11 +19,12 @@ type FancyKeyedData{K}
     bar_size::Float32
     
     inc_hist_vars::Array{K,1} #Histograms (some)incoming data.(all into one)
-    inc_hist::HistogramLog{ExpandingArray{Float64}} #TODO put it in the sets.
-    inc_hist_size::Float32
+    inc_hist_bar_size::Float32
+    inc_hist_background::Bool
     
     viewrange_typ_time::Float32
-    
+    hist_low::Float64
+    hist_d::Float64
     #TODO 
     # * incoming data-cross-other data.
     # * average-over-different lengths of time.
@@ -42,29 +43,38 @@ function FancyKeyedData{K}(kd::KeyedData{K}, opts::Options) #TODO make macro for
     @defaults opts ticks_size = (ticks_dx,ticks_dy)
     @defaults opts bar_vars = plot_vars bar_size = 0.1
 #    @defaults opts inc_hist_vars = nothing
-    @defaults opts inc_hist_d=0.1 inc_hist_low=1e-2
+    @defaults opts hist_d=0.03 hist_low=1e-2
     if true # is(inc_hist_vars, nothing)
         inc_hist_vars,pv,bv = (Array(K,0), Array((K,K),0), Array((K,K),0))
         for el in prep_vars(plot_vars)
-            push(inc_hist_vars, el[1])
+            push(inc_hist_vars, el[2])
             push(pv, el)
         end
         for el in prep_vars(bar_vars)
             push(bv,el)
         end
     end
-    @defaults opts inc_hist =  HistogramLog(inc_hist_low,inc_hist_d) inc_hist_size = 0.1
+    @defaults opts inc_hist = HistogramLog(hist_low,hist_d) inc_hist_bar_size = 0.05
+    @defaults opts inc_hist_background = true
     @defaults opts viewrange_typ_time= 0.5
-    return FancyKeyedData(kd,
-                          pv, float32(plot_size), 
-                          (float32(ticks_size[1]),float32(ticks_size[2])),
-                          bv, float32(bar_size),
-                          inc_hist_vars, inc_hist, float32(inc_hist_size),
-                          float32(viewrange_typ_time))
+    ret= FancyKeyedData(kd,
+                        pv, float32(plot_size), 
+                        (float32(ticks_size[1]),float32(ticks_size[2])),
+                        bv, float32(bar_size),
+                        inc_hist_vars, float32(inc_hist_bar_size),inc_hist_background,
+                        float32(viewrange_typ_time), float64(hist_low),float64(hist_d))
+   if !is(inc_hist, nothing)
+       set_data(ret, inc_hist_vars, inc_hist)
+   end
+   return ret
 end
 
 FancyKeyedData(K, opts::Options) = FancyKeyedData(KeyedData(K), opts)
 FancyKeyedData(x) = FancyKeyedData(x, @options)
+
+get_inc_hist{K}(fkd::FancyKeyedData{K}) =
+    get_data(fkd, fkd.inc_hist_vars,
+             HistogramLog{ExpandingArray{Float64}},nothing)
 
 #Change the main plot of the thing
 function main_plot{K}(fkd::FancyKeyedData{K}, vars::Array{(K,K),1}, opts::Options)
@@ -76,8 +86,9 @@ function main_plot{K}(fkd::FancyKeyedData{K}, vars::Array{(K,K),1}, opts::Option
     end
     if hist_follows_p #TODO see in `type`
         fkd.inc_hist_vars = map(x->x[1], vars)
-        if hist_reset_p
-            fkd.inc_hist = HistogramLog(fkd.inc_hist.low, fkd.inc_hist.n.d)
+        if hist_reset_p || is(get_inc_hist(fkd), nothing)
+            set_data(fkd, fkd.inv_hist_vars, 
+                     HistogramLog(fkd.hist_low, fkd.hist_d))
         end
     end
     return nothing
@@ -90,20 +101,37 @@ main_plot{K,T}(fkd::FancyKeyedData{K}, vars::T) = main_plot(fkd, vars, @options)
 
 function gl_plot{K}(kd::FancyKeyedData{K}, opts::Options)
     @defaults opts plot_size = kd.plot_size bar_size = kd.bar_size
+    @defaults opts inc_hist_bar_size = kd.inc_hist_bar_size
     @defaults opts default_view_range_typ_time = kd.viewrange_typ_time
 #    @defaults opts view_range_typ_time = kd.viewrange_typ_time
+    plot_to_x = 1 - inc_hist_bar_size
+
+    plot_vars_1 = [kd.plot_vars[1][1],kd.plot_vars[1][2]] #Figure out range.
+    vr = get_data(kd, plot_vars_1, ViewRange, nothing)
+    if is(vr,nothing) #None exists yet, make it.
+        vr = ViewRange(default_view_range_typ_time)
+        set_data(kd, plot_vars_1, vr)
+    end    
+    timestep_range(vr, plot_range_of(kd.kd.seq, kd.plot_vars))
+    @defaults opts range = plot_range_of(vr)
+    
+    inc_hist = get_inc_hist(kd) #Figure out histogram range.
+    h_range = (!is(inc_hist,nothing) ? plot_range_of(inc_hist) : nothing)
+    ih_range = (range[2],h_range[2], range[4],h_range[4])
+    
     if plot_size>0 && !isempty(kd.plot_vars)
-        vr = get_data(kd, kd.plot_vars[1], ViewRange, nothing)
-        if is(vr,nothing) #None exists yet, make it.
-            vr = ViewRange(default_view_range_typ_time)
-            set_data(kd, kd.plot_vars[1], vr)
-        end
-        #TODO range seems shocky...
-        timestep_range(vr, plot_range_of(kd.kd.seq, kd.plot_vars))
-        @defaults opts range = plot_range_of(vr)
         @set_options opts range = range
         @with glpushed() begin
-            unit_frame_to(0,bar_size, 1,bar_size + plot_size)            
+            unit_frame_to(0,bar_size, plot_to_x,bar_size + plot_size)            
+            if kd.inc_hist_background && !is(inc_hist,nothing) #Histogram in background.
+                glcolor(0.3,0.3,0.3) #TODO color control.
+                @with glpushed() begin
+                    glrotate(90)
+                    gltranslate(0,-1)
+                    gl_plot_box(inc_hist, @options range=ih_range)
+                end
+                glcolor(1,0,0)
+            end
             gl_plot(kd.kd, kd.plot_vars, opts)
             @defaults opts ticks_size = kd.ticks_size
             tx,ty = isa(ticks_size, (Number,Number)) ? ticks_size :
@@ -122,8 +150,17 @@ function gl_plot{K}(kd::FancyKeyedData{K}, opts::Options)
     end
     if bar_size > 0 && !isempty(kd.bar_vars)
         @with glpushed() begin
-            unit_frame_to(0,0, 1,bar_size)
+            unit_frame_to(0,0, plot_to_x,bar_size)
             gl_plot_bar_intensity(kd.kd.seq, kd.bar_vars,opts)
+        end
+    end
+    if inc_hist_bar_size>0 && !is(inc_hist,nothing)
+        glcolor(1,1,1)
+        @with glpushed() begin
+            unit_frame_to(plot_to_x,bar_size, 1,bar_size + plot_size)
+            glrotate(90)
+            gltranslate(0,-1)
+            gl_plot_bar_intensity(inc_hist, @options range=ih_range)
         end
     end
 end

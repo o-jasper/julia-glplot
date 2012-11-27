@@ -18,12 +18,12 @@ Single(K) = Single(typemin(Float64), Array(K,0),
 
 type KeyedData{K}
     single::Dict{K, Single{K}}
-    set::Dict{(K...), Dict{CompositeKind,Any}}
+    set::Dict{Array{K,1}, Dict{CompositeKind,Any}}
 
     seq::ContinuousSeq{K}
 end
 KeyedData(K) =
-    KeyedData(Dict{K,Single{K}}(), Dict{(K...),Dict{CompositeKind,Any}}(), 
+    KeyedData(Dict{K,Single{K}}(), Dict{Array{K,1},Dict{CompositeKind,Any}}(), 
               ContinuousSeq(K))
 
 #Get single entry, create if it doesnt exist.
@@ -50,7 +50,7 @@ end
 get_data{K}(kd::KeyedData{K}, get_key::K,get_tp::CompositeKind) =
     get_data(kd, get_key,get_tp, nothing)
 #Get pair entry, create if it doesnt exist.
-function ensure_tuple{K}(kd::KeyedData{K}, ij::(K...))
+function ensure_tuple{K}(kd::KeyedData{K}, ij::Array{K,1})
     got = get(kd.set, ij,nothing)
     if is(got, nothing)
         got = Dict{CompositeKind,Any}()
@@ -58,39 +58,75 @@ function ensure_tuple{K}(kd::KeyedData{K}, ij::(K...))
     end
     return got
 end
+
+#Also trigger other stuff on single entry.
+type SingleTrigger{K}
+    what::Any #thing to trigger
+    under::Array{K,1} #Under what key it is stored.
+end
+
+kd_incorporate{K}(kd::KeyedData{K},k::K, st::SingleTrigger{K}, x,step) =
+    incorporate(st.what, x,step)
+
+#Also trigger stuff once each of a list has a new one.
+type EachTrigger{K}
+    what::Any #thing to trigger
+    under::Array{K,1} #Under what key it is stored.
+#Which have come along since last time typemin(Float64) is not filled.
+    have::Array{Float64,1} 
+end
+function kd_incorporate{K}(kd::KeyedData{K},k::K, et::EachTrigger{K}, x,step)
+    i=1
+    while i<=length(et.under) && et.under[i]!=k
+        i+=1
+    end
+    assert(i<=length(et.under), "Error: `EachTrigger object wrongly-pointed`")
+    et.have[i] = x
+    for val in et.have
+        if val==typemin(Float64) #One of them not filled yet.
+            return nothing
+        end
+    end
+    incorporate(et.what, et.have, step) #All filled, enter and reset.
+    et.have = map(x->typemin(Float64), et.have)
+    return nothing
+end
+#Default nothing else needs adding also.
+also_set{K}(ij::Array{K,1}, with) = {} 
+#1d histograms count everything in the list.
+function also_set{K,I}(ij::Array{K,1}, h::HistogramLog{I}) 
+    st = SingleTrigger(h, ij)
+    return map(k->(k,st), ij)
+end
+
 #Set/add tuple keyed data.
-function set_data{K}(kd::KeyedData{K}, ij::(K...), set)
+function set_data{K}(kd::KeyedData{K}, ij::Array{K,1}, set)
     assign(ensure_tuple(kd,ij), set, typeof(set))
+    #Other things to also trigger incorporates on.
+    for kv in also_set(ij,set) #List of stuff also set with the thing.
+        k,v = kv
+        set_data(kd, k,v)
+    end
     return set
 end
 #Set/add tuple keyed data.
-get_data{K}(kd::KeyedData{K}, ij::(K...), tp::CompositeKind, otherwise) =
+get_data{K}(kd::KeyedData{K}, ij::Array{K,1}, tp::CompositeKind, otherwise) =
     get(ensure_tuple(kd,ij), tp, otherwise)
-get_data{K}(kd::KeyedData{K}, ij::(K...), tp::CompositeKind) = 
+get_data{K}(kd::KeyedData{K}, ij::Array{K,1}, tp::CompositeKind) = 
     get_data(kd, ij, tp, nothing)
+
+kd_incorporate{K}(kd::KeyedData{K},k::K, v,x,step) = incorporate(v,x,step)
 
 function incorporate{K}(kd::KeyedData{K}, k::K, x,step)
     single = ensure_single(kd,k)
-    if single.incorporate_seq_p
+    if single.incorporate_seq_p #Incorporate into sequence.
         incorporate(kd.seq, k,x)
     end
     single.last_val = x
-    for kv in single.data #Incorporate into all of them.
-        k,v = kv #(k==typeof(v))
-        incorporate(v, x,step)
+    for tp_v in single.data #Incorporate into all of them.
+        tp,v = tp_v #(k==typeof(v))
+        kd_incorporate(kd,k,v, x,step)
     end
-#TODO    
-#    for tk in single.trigger_also #Add stuff to whatever is triggered.
-#        got = get(kd.single, tk, nothing)
-#        if !is(got,nothing) && got.last_val!=typemin(Float64)
-#            set = get(kd.set, (tk,k), nothing)
-#            if !is(set, nothing)
-#                for el in set
-#                    incorporate(el[2], x,got.last_val, step)
-#                end
-#            end
-#        end
-#    end
 end
 incorporate{K}(kd::KeyedData{K}, x,y) = incorporate(kd, x,y,1)
 
@@ -102,7 +138,7 @@ PointDuration(d::Number) = PointDuration(float64(d))
 
 incorporate(pd::PointDuration, whatever...) = nothing
 
-set_data{K}(kd::KeyedData{K}, to_key::K, set::PointDuration) = #!
+set_data{K}(kd::KeyedData{K}, to_key::K, set::PointDuration) =
     assign(kd.seq.duration, set.duration, to_key)
 function get_data{K}(kd::KeyedData{K}, get_key::K,
                             get_tp::Type{PointDuration}, otherwise)
