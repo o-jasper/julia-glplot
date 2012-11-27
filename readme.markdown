@@ -46,27 +46,34 @@ lines aught to indicate no errors.
 
 ## (maybe)TODO
 
-* Fix out-of-dateness.
+* Update readme.
 
-* How stuff is loaded/run not standard? How do i get this to be according to
-  'the best convention' out there?
+* Packaging... I *cannot* find how to do it properly, i dont want to load
+  stuff, `import` (or now `use`) *should* do it IMO.
 
-* Real time plotter 'averages over different lengths of time' plot and
-  corresponding '2d' histogram. What is currently there is a bit too limited.
-  + Also bar plots along length.
+* Real time plotter/`KeyedData`
+  + 'averages over different lengths of time' 
+  + `ContinuousSeq` 'virtual' elements.
+  + `KeyedData` 'deltas' as values.(and drawing thereof in `FancyKeyedData`)
+  + Real time plot linear fitting.(there is already some linear fitting code)
+  + Spectrums.(and drawing thereof)
+  + Matrix with correlations.
   
+* `FancyKeyedData` as object is the right way? Seems like an elaborate
+  set of options, maybe do it that way?
+
 * Waterfall plot. (possibly change real time plotter to do it)
+  Note: the real time plotter with many bar plots can do it.
+  (but not exactly optimal)
 
 * better docs, examples.(Well the tests are examples.)
-  Example with arduino output.
+  Example with arduino input.
 
 * plotting of 2d arrays and histograms. 
 
 * 3d plots.
 
 * other outputs? (cairo?)
-
-* Get the linear fitting code to work.
 
 ## Copyright
 Everything is under GPLv3, license included under `doc/`
