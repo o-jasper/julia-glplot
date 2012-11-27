@@ -8,7 +8,7 @@ end
 
 HistogramLog(low::Number, d::Number, I) =
     HistogramLog(float64(low), 
-                 Field(0,d, ExpandingArray(I)), 
+                 Field(0,-d, ExpandingArray(I)), 
                  Field(0,d, ExpandingArray(I)))
 
 HistogramLog(low::Number, d::Number) = HistogramLog(low,d, Float64)

@@ -23,7 +23,8 @@ type FancyKeyedData{K}
     inc_hist_background::Bool
     
     viewrange_typ_time::Float32
-    hist_low::Float64
+    hist_low::Float64 #TODO this belongs to KeyedData... 
+                      # Also, 'match' hist_low with hist_d defaultly??(typical_range)
     hist_d::Float64
     #TODO 
     # * incoming data-cross-other data.
